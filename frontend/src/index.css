@@ -1,0 +1,65 @@
+/* src/index.css */
+:root {
+  /* Light theme variables */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-card: #ffffff;
+  --text-primary: #1a1a1a;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --accent-primary: #4f46e5;
+  --accent-secondary: #0ea5a4;
+  --border-color: #e5e7eb;
+  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --scrollbar-height: 8px;
+  --scrollbar-track: transparent;
+  --scrollbar-thumb: rgba(15, 19, 58, 0.22);
+  /* light mode thumb */
+  --scrollbar-thumb-hover: rgba(15, 19, 58, 0.42);
+
+  /* Component specific */
+  --header-bg: #ffffff;
+  --footer-bg: #ffffff;
+  --input-bg: #ffffff;
+  --card-bg: #f8f8f8;
+  --dropdown-bg: #ffffff;
+}
+
+/* Dark theme variables */
+.dark-theme {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-card: #1e293b;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --accent-primary: #6366f1;
+  --accent-secondary: #14b8a6;
+  --border-color: #334155;
+  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+
+  /* Component specific */
+  --header-bg: #1e293b;
+  --footer-bg: #1e293b;
+  --input-bg: #334155;
+  --card-bg: #1e293b;
+  --dropdown-bg: #334155;
+  --scrollbar-thumb: rgba(255, 255, 255, 0.18);
+  /* dark mode thumb */
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.34);
+  --scrollbar-track: transparent;
+}
+
+/* Base styles */
+* {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}

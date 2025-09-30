@@ -1,0 +1,137 @@
+/* src/components/RegisterForm.module.css
+   Uses global theme variables (defined in src/index.css).
+   Keep .dark-theme applied to a parent (eg. <html> or <body>) for dark mode.
+*/
+
+.container{
+  display:flex;
+  min-height: 60vh;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 16px;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  /* subtle gradient between header and page background */
+  /* background: linear-gradient(180deg, var(--header-bg, #ffffff) 0%, var(--bg-secondary, #f6f9fc) 100%); */
+  background: transparent;
+}
+
+.card{
+  width: 100%;
+  max-width: 520px;
+  background: var(--card-bg, #ffffff);
+  border-radius: 12px;
+  padding: 22px;
+  box-shadow: var(--shadow, 0 10px 30px rgba(2,6,23,0.06));
+  border: 1px solid var(--border-color, rgba(2,6,23,0.06));
+}
+
+.title{
+  margin: 0 0 6px 0;
+  font-size: 1.25rem;
+  color: var(--text-primary, #071133);
+  font-weight: 700;
+}
+
+.lead{
+  margin: 0 0 14px 0;
+  color: var(--text-muted, #6b7280);
+  font-size: 0.95rem;
+}
+
+/* Alerts */
+.alertError{
+  background: linear-gradient(180deg, rgba(239,68,68,0.06), rgba(239,68,68,0.03));
+  color: var(--danger, #ef4444);
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(239,68,68,0.08);
+}
+
+.alertSuccess{
+  background: linear-gradient(180deg, rgba(14,165,164,0.06), rgba(14,165,164,0.03));
+  color: var(--success-text, #065f59);
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(14,165,164,0.06);
+}
+
+/* form layout */
+.form{ display:flex; flex-direction: column; gap: 12px; }
+
+.row{ display:flex; gap: 12px; }
+.field{ display:flex; flex-direction:column; gap:8px; flex:1; min-width:0; }
+.label{ font-size:0.82rem; color:var(--text-muted, #6b7280); }
+
+/* Inputs */
+.input{
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color, rgba(2,6,23,0.06));
+  outline: none;
+  font-size: 0.95rem;
+  background: var(--input-bg, #ffffff);
+  color: var(--text-primary, #1a1a1a);
+  transition: box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.input::placeholder{ color: var(--text-muted, #9ca3af); }
+
+.input:focus{
+  box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0,0,0,0.08));
+  border-color: var(--accent-primary, #4f46e5);
+}
+
+/* password toggle */
+.passwordWrap{ display:flex; align-items:center; gap:8px; }
+.pwToggle{
+  background:transparent;
+  border:none;
+  color:var(--accent-secondary, #0284c7);
+  font-weight:600;
+  cursor:pointer;
+  padding:6px 8px;
+  border-radius:8px;
+}
+
+/* actions */
+.actions{ display:flex; gap:10px; align-items:center; margin-top:8px; }
+
+/* primary button uses the theme accents */
+.primary{
+  background: linear-gradient(180deg, var(--accent-primary, #4f46e5), var(--accent-secondary, #0ea5a4));
+  color: var(--button-text, #ffffff);
+  border:none;
+  padding:10px 14px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:700;
+  box-shadow: var(--shadow, 0 8px 18px rgba(2,6,23,0.06));
+}
+.primary:disabled{ opacity:0.6; cursor:not-allowed; }
+
+.ghost{
+  background:transparent;
+  border:1px solid var(--border-color, rgba(2,6,23,0.06));
+  padding:10px 14px;
+  border-radius:10px;
+  cursor:pointer;
+  color: var(--text-primary, #1a1a1a);
+}
+
+/* small helper text */
+.small{ margin-top:12px; font-size:0.85rem; color:var(--text-muted, #6b7280); }
+
+.otpWrap{ display:flex; flex-direction:column; gap:12px; }
+.otpLead{ margin:0; color:var(--text-muted, #6b7280); font-size:0.95rem; }
+
+.preview{ margin-top:8px; font-size:0.85rem; color:var(--text-muted, #6b7280); }
+.preview a{ color: var(--accent-secondary, #0284c7); font-weight:600; }
+
+.done{ text-align:center; padding:18px 0; }
+
+@media (max-width:520px){
+  .row{ flex-direction:column; }
+  .card{ padding:16px; }
+  .container{ padding:18px 12px; }
+}

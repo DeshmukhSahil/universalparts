@@ -1,0 +1,110 @@
+:root{
+  --muted:#6b7280;
+  --accent:#0066ff;
+  --border:#e6e9ee;
+  --radius:10px;
+  --success:#16a34a;
+  --danger:#ef4444;
+}
+
+.container{
+  max-width:720px;
+  margin:18px auto;
+  padding:14px;
+  border-radius:12px;
+  border:1px dashed var(--border);
+  background:#fff;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+.title{ margin:0 0 10px 0; font-size:15px; color:#0f172a; }
+
+.formRow{
+  display:grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap:8px;
+  align-items:center;
+}
+
+@media (max-width:720px){
+  .formRow{ grid-template-columns: 1fr; }
+}
+
+.input{
+  padding:10px 12px;
+  border-radius:8px;
+  border:1px solid var(--border);
+  font-size:14px;
+}
+
+.button{
+  padding:10px 14px;
+  border-radius:8px;
+  border:none;
+  background:var(--accent);
+  color:#fff;
+  font-weight:600;
+  cursor:pointer;
+  transition: transform .08s ease, box-shadow .12s ease;
+}
+
+.button:disabled{ opacity:0.6; cursor:default; transform:none; }
+
+.button:active:not(:disabled){ transform:translateY(1px); }
+
+.result{
+  margin-top:12px;
+  padding:12px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:#fbfdff;
+  color:#0f172a;
+}
+
+.sharedTitle{ font-weight:600; margin-top:8px; }
+
+.visuallyHidden{
+  position:absolute !important;
+  height:1px; width:1px; overflow:hidden;
+  clip:rect(1px,1px,1px,1px);
+  white-space:nowrap;
+}
+
+.small{ font-size:0.9rem; color:var(--muted); }
+
+.smallBtn{
+  background:transparent;
+  border:1px solid var(--border);
+  padding:6px 8px;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:0.9rem;
+}
+
+.toggleDebug{
+  margin-left: auto;
+  background:transparent;
+  border:none;
+  color:var(--muted);
+  cursor:pointer;
+  padding:4px 8px;
+}
+
+.err{ margin-top:10px; color:var(--danger); font-weight:600; }
+
+.yes{ color:var(--success); }
+.no{ color:var(--danger); }
+
+.hint{ margin-top:8px; color:var(--muted); font-size:0.95rem; }
+
+.pre{
+  background:#0f172a0a;
+  padding:10px;
+  border-radius:8px;
+  margin-top:8px;
+  overflow:auto;
+  max-height:320px;
+  font-size:13px;
+  white-space:pre-wrap;
+  word-break:break-word;
+}

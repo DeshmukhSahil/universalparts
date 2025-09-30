@@ -1,0 +1,460 @@
+:root {
+  /* keep minimal — global tokens live in the global stylesheet */
+  --tab-gap: 8px;
+  --scrollbar-height: 8px;
+  --scrollbar-track: transparent;
+  --scrollbar-thumb: rgba(15, 19, 58, 0.22);
+  /* light mode thumb */
+  --scrollbar-thumb-hover: rgba(15, 19, 58, 0.42);
+}
+
+[data-theme="dark"]{
+  --scrollbar-thumb: rgba(255, 255, 255, 0.18);     /* dark mode thumb */
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.34);
+  --scrollbar-track: transparent;
+}
+
+/* container */
+.resultsContainer {
+  max-width: 100%;
+  margin: 0;
+  padding: 0 1rem;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  color: var(--text-primary);
+  background: transparent;
+}
+
+/* APP BAR */
+.appBarWrap {
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: center;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: transparent;
+  backdrop-filter: blur(6px);
+  padding: 6px 0;
+}
+
+/* For dark theme, make the header slightly transparent/darker */
+[data-theme="dark"] .appBarWrap {
+  background: linear-gradient(180deg, rgba(7, 17, 37, 0.85), rgba(7, 17, 37, 0.78));
+}
+
+/* horizontal scrollable tabs */
+.appBar {
+  display: flex;
+  gap: var(--tab-gap);
+  align-items: center;
+  padding: 6px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+  /* max-width: 880px; */
+  box-sizing: border-box;
+}
+
+/* WebKit / Chromium */
+.appBar::-webkit-scrollbar {
+  height: var(--scrollbar-height);
+}
+
+.appBar::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+/* thumb: rounded, subtle inset border so it reads on blurred backgrounds */
+.appBar::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 999px;
+  border: 2px solid transparent;            /* creates internal padding */
+  background-clip: padding-box;              /* keep border visible */
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.03);
+  transition: background 160ms ease, transform 160ms ease;
+}
+
+.appBar::-webkit-scrollbar-thumb:hover,
+.appBar::-webkit-scrollbar-thumb:active {
+  background: var(--scrollbar-thumb-hover);
+  transform: scaleY(1.03);
+}
+
+/* make the thumb slightly more visible when the appBar has keyboard focus (accessibility) */
+.appBar:focus-within::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--scrollbar-thumb) 80%, #000 20%);
+}
+
+/* Firefox */
+.appBar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+/* scrollbar corner (Chromium) */
+.appBar::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* tab */
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: transform .08s ease, background .12s ease, box-shadow .12s ease;
+  min-width: var(--tab-min-w);
+  max-width: var(--tab-max-w);
+  flex: 0 0 auto;
+  box-shadow: 0 1px 0 rgba(16, 24, 40, 0.02);
+  font-size: 0;
+  line-height: 1;
+  -webkit-tap-highlight-color: transparent;
+  color: var(--text-primary);
+}
+
+/* dark tab background */
+[data-theme="dark"] .tab {
+  background: rgba(255, 255, 255, 0.02);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+/* focus ring */
+.tab:focus {
+  outline: none;
+  box-shadow: 0 8px 28px rgba(79, 70, 229, 0.08);
+}
+
+/* active tab */
+.tabActive {
+  background: linear-gradient(90deg, rgba(79, 70, 229, 0.06), rgba(79, 70, 229, 0.02));
+  border: 1px solid rgba(79, 70, 229, 0.12);
+  color: var(--accent);
+  transform: translateY(-2px);
+}
+
+/* tab label */
+.tabLabel {
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: clamp(13px, 1.6vw, 15px);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.tabCount {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: clamp(11px, 1.1vw, 13px);
+  color: var(--muted-2);
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* device header */
+.deviceHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--card-bg);
+  padding: 1rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--card-border);
+  margin-bottom: 1rem;
+  color: var(--surface-text);
+}
+
+/* keep device left/right colors aligned with tokens */
+.brand {
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.deviceName {
+  margin: 0;
+  font-size: 18px;
+  color: var(--surface-text);
+}
+
+.aliases {
+  font-size: 13px;
+  color: var(--muted-2);
+}
+
+/* right */
+.metaLabel {
+  font-size: 12px;
+  padding: 10px;
+  color: var(--muted-2);
+}
+
+.metaValue {
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--surface-text);
+}
+
+/* groups list */
+.groupsList {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr;
+}
+
+/* group card */
+.groupCard {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: var(--soft-shadow);
+  border: 1px solid var(--card-border);
+  transition: transform .12s ease;
+}
+
+.groupCard:hover {
+  transform: translateY(-4px);
+}
+
+/* group header */
+.groupHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.groupTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--surface-text);
+}
+
+.groupNote {
+  color: var(--muted-2);
+  font-style: italic;
+  font-size: 13px;
+}
+
+/* header actions (count + expand) */
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modelsCount {
+  font-size: 13px;
+  color: var(--muted-2);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.expandBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 19, 58, 0.04);
+  background: transparent;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--surface-text);
+}
+
+[data-theme="dark"] .expandBtn {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.expandBtn:focus {
+  outline: none;
+  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.06);
+}
+
+/* badges */
+.partBadges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.partBadge {
+  background: rgba(15, 19, 58, 0.04);
+  border: 1px solid rgba(15, 19, 58, 0.04);
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.partBadge:hover {
+  background: rgba(79, 70, 229, 0.04);
+  color: var(--accent);
+  border-color: rgba(79, 70, 229, 0.08);
+}
+
+[data-theme="dark"] .partBadge {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  color: var(--muted-2);
+}
+
+/* models grid */
+.modelsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+  transition: max-height .28s cubic-bezier(.2, .9, .2, 1), opacity .22s ease;
+  overflow: hidden;
+}
+
+.modelsGrid.collapsed {
+  max-height: 0;
+  opacity: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.modelsGrid.open {
+  max-height: 2000px;
+  opacity: 1;
+}
+
+/* model card */
+.modelCard {
+  background: var(--card-bg);
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid var(--card-border);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 64px;
+  color: var(--surface-text);
+}
+
+.modelBrand {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.modelName {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--surface-text);
+}
+
+.modelFooter {
+  margin-top: 8px;
+}
+
+.modelBadge {
+  background: rgba(15, 19, 58, 0.04);
+  padding: 6px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+[data-theme="dark"] .modelBadge {
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--muted-2);
+}
+
+/* no groups */
+.noGroups {
+  background: var(--card-bg);
+  padding: 1rem;
+  border-radius: 12px;
+  color: var(--muted);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--card-border);
+  text-align: center;
+}
+
+/* responsive improvements (unchanged) */
+@media (max-width: 720px) {
+  :root {
+    --tab-max-w: 180px;
+  }
+
+  .appBarWrap {
+    top: 0px;
+    padding: 8px 0;
+  }
+
+  .tab {
+    padding: 12px 14px;
+    min-width: 84px;
+  }
+
+  .tabLabel {
+    font-size: clamp(14px, 3.2vw, 16px);
+  }
+
+  .tabCount {
+    font-size: clamp(12px, 2.2vw, 13px);
+  }
+
+  .deviceHeader {
+    padding: 12px;
+  }
+
+  .deviceName {
+    font-size: 16px;
+  }
+
+  .groupCard {
+    padding: 10px;
+  }
+
+  .groupHeader {
+    flex-direction: row;
+    gap: 8px;
+  }
+
+  .modelsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 420px) {
+  :root {
+    --tab-min-w: 84px;
+    --tab-max-w: 220px;
+  }
+
+  .tab {
+    padding: 14px 16px;
+    min-width: 96px;
+  }
+
+  .expandBtn {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+
+  .resultsContainer {
+    padding: 0.5rem;
+  }
+}
