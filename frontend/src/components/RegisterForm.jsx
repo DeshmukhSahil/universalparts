@@ -4,7 +4,7 @@ import axios from "axios";
 import styles from "./RegisterForm.module.css";
 import { AuthContext } from "../contexts/AuthContext";
 
-const API = process.env.REACT_APP_API_BASE; // e.g. http://localhost:5000 or http://localhost:5000/api
+const API = process.env.REACT_APP_API_BASE; // e.g. https://universalparts.onrender.com or https://universalparts.onrender.com/api
 // NOTE: Ensure your backend routes are reachable at `${API}/auth/...`
 // If your REACT_APP_API_BASE already contains /api, using `${API}/auth/register` is still correct.
 

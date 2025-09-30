@@ -21,7 +21,7 @@ const Chatbot = () => {
     setUserMessage('');
 
     try {
-      const response = await axios.post(`http://localhost:5000/api/chatbot`, { message: userMessage });
+      const response = await axios.post(`https://universalparts.onrender.com/api/chatbot`, { message: userMessage });
       setMessages([...newMessages, { sender: 'bot', text: response.data.response }]);
     } catch (error) {
       console.error('Error sending message:', error);

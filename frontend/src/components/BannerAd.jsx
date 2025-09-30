@@ -27,7 +27,7 @@ export default function BannerAd({ placement = "header", device, part, rotateMs 
         const q = new URLSearchParams({ placement });
         if (device) q.set("device", device);
         if (part) q.set("part", part);
-        const res = await fetch(`http://localhost:5000/api/ads?${q.toString()}`);
+        const res = await fetch(`https://universalparts.onrender.com/api/ads?${q.toString()}`);
         const json = await res.json();
         if (!cancelled) setAds(json.ads || []);
       } catch (err) {
@@ -42,7 +42,7 @@ export default function BannerAd({ placement = "header", device, part, rotateMs 
   function makePublicUrl(url) {
     if (!url) return "";
     if (/^https?:\/\//i.test(url)) return url;
-    return `http://localhost:5000${url.startsWith('/') ? url : '/' + url}`;
+    return `https://universalparts.onrender.com${url.startsWith('/') ? url : '/' + url}`;
   }
 
   // helper: extract hostname for favicon + display
@@ -92,9 +92,9 @@ export default function BannerAd({ placement = "header", device, part, rotateMs 
       const body = JSON.stringify({ placement, ts: Date.now() });
       if (navigator.sendBeacon) {
         const blob = new Blob([body], { type: "application/json" });
-        navigator.sendBeacon(`http://localhost:5000/api/ads/${adId}/impression`, blob);
+        navigator.sendBeacon(`https://universalparts.onrender.com/api/ads/${adId}/impression`, blob);
       } else {
-        fetch(`http://localhost:5000/api/ads/${adId}/impression`, { method: "POST", headers: { "Content-Type": "application/json" }, body });
+        fetch(`https://universalparts.onrender.com/api/ads/${adId}/impression`, { method: "POST", headers: { "Content-Type": "application/json" }, body });
       }
     } catch { /* ignore */ }
   }
@@ -104,9 +104,9 @@ export default function BannerAd({ placement = "header", device, part, rotateMs 
       const body = JSON.stringify({ placement, ts: Date.now() });
       if (navigator.sendBeacon) {
         const blob = new Blob([body], { type: "application/json" });
-        navigator.sendBeacon(`http://localhost:5000/api/ads/${ad._id}/click`, blob);
+        navigator.sendBeacon(`https://universalparts.onrender.com/api/ads/${ad._id}/click`, blob);
       } else {
-        fetch(`http://localhost:5000/api/ads/${ad._id}/click`, { method: "POST", headers: { "Content-Type": "application/json" }, body, keepalive: true });
+        fetch(`https://universalparts.onrender.com/api/ads/${ad._id}/click`, { method: "POST", headers: { "Content-Type": "application/json" }, body, keepalive: true });
       }
     } catch { /* swallow */ }
     if (ad.targetUrl) window.open(ad.targetUrl, "_blank", "noopener,noreferrer");

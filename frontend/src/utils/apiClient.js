@@ -1,7 +1,7 @@
 // central axios client used by your admin UI
 import axios from 'axios';
 
-const BASE = process.env.REACT_APP_API_BASE || 'http://localhost:5000';
+const BASE = process.env.REACT_APP_API_BASE || 'https://universalparts.onrender.com';
 
 const api = axios.create({
   baseURL: BASE,
