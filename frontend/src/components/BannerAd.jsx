@@ -126,8 +126,6 @@ export default function BannerAd({ placement = "header", device, part, rotateMs 
     return (
       <div className={styles.fallback}>
         <div className={styles.placeholder}>
-          <strong>Advertise here</strong>
-          <small style={{marginLeft:'10px'}}>Contact us to book this spot.</small>
         </div>
       </div>
     );

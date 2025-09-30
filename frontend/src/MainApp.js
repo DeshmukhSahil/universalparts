@@ -311,7 +311,7 @@ function MainApp() {
                     <span className={styles.g3}>d</span>
                     <span className={styles.g4}>e</span>
                   </h1>
-                  <p className={styles.tagline}>Search compatibilities, parts & models</p>
+                  <p className={styles.tagline}>Search Compatibilities, Parts & Models</p>
                 </div>
 
                 <div className={styles.searchWrap}>
