@@ -17,6 +17,7 @@ import { search, autocomplete } from "./utils/api";
 import { fetchAdminParts } from "./utils/adminApi";
 import styles from "./App.module.css";
 import Chatbot from "./components/Chatbot";
+import AnnouncementBar from "./components/AnnouncementBar";
 
 function ThemeToggle() {
   const { isDarkMode, toggleTheme } = useTheme();
@@ -335,6 +336,7 @@ function MainApp() {
                   onPartSelect={handlePartSelect}
                 />
               </section>
+              <AnnouncementBar/>
               <BannerAd />
               {/* <QueryBot searchInputId="site-search-input" whatsappNumber="919876543210" /> */}
               <Chatbot/>

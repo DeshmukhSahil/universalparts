@@ -13,6 +13,7 @@ const authRoutes = require("./routes/auth");
 const subscriptionRoutes = require("./routes/subscription");
 const seedRouter = require('./routes/seed');
 const apiRouter = require('./routes/api');
+const announcementsRouter = require('./routes/announcements');
 
 const { initFirebaseAdmin } = require("./utils/firebaseAdmin");
 try {
@@ -82,6 +83,7 @@ app.use('/api/admin', adminRouter);
 app.use('/api/seed', seedRouter);
 app.use('/api', apiRouter);
 app.use("/api/ads", adsRouter);
+app.use('/api/announcements', announcementsRouter);
 
 // rest of file: mongoose.connect + listen (unchanged)
 const PORT = process.env.PORT || 5000;
