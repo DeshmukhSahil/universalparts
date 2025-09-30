@@ -76,6 +76,7 @@ app.post('/api/chatbot-inline', (req, res) => {
 });
 
 // register routes (chatbot mounted early)
+app.use('/api/announcements', announcementsRouter);
 app.use("/api/chatbot", chatbotRouter);
 app.use("/api/auth", authRoutes);
 app.use("/api/subscription", subscriptionRoutes);
@@ -83,7 +84,6 @@ app.use('/api/admin', adminRouter);
 app.use('/api/seed', seedRouter);
 app.use('/api', apiRouter);
 app.use("/api/ads", adsRouter);
-app.use('/api/announcements', announcementsRouter);
 
 // rest of file: mongoose.connect + listen (unchanged)
 const PORT = process.env.PORT || 5000;

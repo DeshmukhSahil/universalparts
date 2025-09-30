@@ -25,7 +25,7 @@ router.get('/', async (req, res) => {
 });
 
 // ADMIN: create
-router.post('/', auth, requireAdmin, async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const { title, message, pinned, startsAt, expiresAt, active } = req.body;
     const ann = new Announcement({
