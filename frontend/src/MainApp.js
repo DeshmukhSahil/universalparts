@@ -19,6 +19,12 @@ import styles from "./App.module.css";
 import Chatbot from "./components/Chatbot";
 import AnnouncementBar from "./components/AnnouncementBar";
 
+// <-- NEW: import your logo from assets -->
+import lightLogo from "./assets/GSMGUIDE1.jpg";
+import darkLogo from "./assets/GSMGUIDE2.jpg";
+import ForgotPassword from "./components/ForgotPassword";
+import ResetPassword from "./components/ResetPassword";
+
 function ThemeToggle() {
   const { isDarkMode, toggleTheme } = useTheme();
 
@@ -179,17 +185,23 @@ function MainApp() {
             className={styles.brand}
             onClick={() => navigate("/")}
             aria-label="GSMGuide home"
+            title="Home"
+            style={{ display: "flex", alignItems: "center", gap: 8 }}
           >
-            <span className={styles.brandText}>
-              <span style={{ color: '#4285F4' }}>G</span>
-              <span style={{ color: '#DB4437' }}>S</span>
-              <span style={{ color: '#F4B400' }}>M</span>
-              <span style={{ color: '#6C43D8' }}>G</span>
-              <span style={{ color: '#4285F4' }}>u</span>
-              <span style={{ color: '#DB4437' }}>i</span>
-              <span style={{ color: '#F4B400' }}>d</span>
-              <span style={{ color: '#0F9D58' }}>e</span>
-            </span>
+            {/* Use logo image; if it errors, hide the image (keeps accessibility) */}
+            <img
+              src={isDarkMode ? darkLogo : lightLogo}
+              alt="GSMGuide logo"
+              className={styles.brandLogo}
+              onError={(e) => {
+                // hide broken image so your layout falls back to text if needed
+                e.currentTarget.style.display = "none";
+              }}
+              style={{ height: 40, width: "auto", objectFit: "contain" }}
+            />
+
+            {/* Optional fallback text for screenreaders or when image is hidden */}
+            <span className={styles.srOnly}>GSMGuide</span>
           </button>
         </div>
 
@@ -336,10 +348,10 @@ function MainApp() {
                   onPartSelect={handlePartSelect}
                 />
               </section>
-              <AnnouncementBar/>
+              <AnnouncementBar />
               <BannerAd />
               {/* <QueryBot searchInputId="site-search-input" whatsappNumber="919876543210" /> */}
-              <Chatbot/>
+              <Chatbot />
             </>
           }
         />
@@ -349,6 +361,9 @@ function MainApp() {
         <Route path="/register" element={<main className={styles.main}><RegisterForm /></main>} />
         <Route path="/verify-email" element={<main className={styles.main}><EmailOTPVerify /></main>} />
         <Route path="/verify-phone" element={<main className={styles.main}><PhoneOTP /></main>} />
+        <Route path="/forgot-password" element={<main className={styles.main}><ForgotPassword /></main>} />
+        <Route path="/reset-password/:token" element={<main className={styles.main}><ResetPassword /></main>} />
+
 
         {/* User Dashboard */}
         <Route path="/dashboard" element={<UserDashboard />} />

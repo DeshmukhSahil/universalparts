@@ -13,6 +13,8 @@ const multer = require('multer');
 const upload = multer({ dest: 'tmp/uploads' });
 const fs = require('fs');
 const mongoose = require('mongoose');
+const { authMiddleware } = require('../middleware/auth');
+const { adminOnly } = require('../middleware/adminOnly');
 
 // Helper to safe JSON parse
 function tryParseJSON(str) {
@@ -22,7 +24,7 @@ function tryParseJSON(str) {
 
 
 // DEBUG route to inspect exported workbook structure quickly
-router.get('/export/debug', async (req, res) => {
+router.get('/export/debug', authMiddleware, adminOnly, async (req, res) => {
   try {
     const brands = await Brand.find().lean();
     const devices = await Device.find().populate('brand', 'name slug').lean();
@@ -145,7 +147,7 @@ router.get('/export/debug', async (req, res) => {
 
 // ---------- EXPORT route ----------
 // improved export route (replace existing /export/all)
-router.get('/export/all', async (req, res) => {
+router.get('/export/all', authMiddleware, adminOnly, async (req, res) => {
   try {
     const brands = await Brand.find().lean();
     // populate brand on devices so we can export brand.slug & brand.name
@@ -211,7 +213,7 @@ router.get('/export/all', async (req, res) => {
 
 // ---------- IMPORT route ----------
 
-router.post('/import', upload.single('file'), async (req, res) => {
+router.post('/import', authMiddleware, adminOnly,  upload.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'file required (form field name: file)' });
 
   const filePath = req.file.path;
@@ -531,7 +533,7 @@ router.post('/import', upload.single('file'), async (req, res) => {
 */
 
 // Create or get Brand
-router.post('/brand', async (req, res) => {
+router.post('/brand', authMiddleware, adminOnly,  async (req, res) => {
   try {
     const name = (req.body.name || '').trim();
     if (!name) return res.status(400).json({ error: 'name required' });
@@ -543,7 +545,7 @@ router.post('/brand', async (req, res) => {
 });
 
 // Create Device (upsert by slug)
-router.post('/device', async (req, res) => {
+router.post('/device', authMiddleware, adminOnly,  async (req, res) => {
   try {
     const { brandSlug, brandName, name, aliases } = req.body;
     if (!name) return res.status(400).json({ error: 'device name required' });
@@ -581,7 +583,7 @@ router.post('/device', async (req, res) => {
 });
 
 // Create or get PartCategory
-router.post('/part', async (req, res) => {
+router.post('/part', authMiddleware, adminOnly,  async (req, res) => {
   try {
     const name = (req.body.name || '').trim();
     if (!name) return res.status(400).json({ error: 'name required' });
@@ -604,7 +606,7 @@ router.get('/parts', async (req, res) => {
 
 
 // Create Compatibility Group (models: array of device slugs OR ids)
-router.post('/group', async (req, res) => {
+router.post('/group', authMiddleware, adminOnly,  async (req, res) => {
   try {
     const { partSlug, partId, models } = req.body;
     if (!models || !Array.isArray(models) || models.length < 1) return res.status(400).json({ error: 'models[] required' });
@@ -640,7 +642,7 @@ router.post('/group', async (req, res) => {
 });
 
 // Add alias to device
-router.post('/device/:slug/alias', async (req, res) => {
+router.post('/device/:slug/alias', authMiddleware, adminOnly,  async (req, res) => {
   try {
     const slug = req.params.slug;
     const alias = (req.body.alias || '').trim();
@@ -654,7 +656,7 @@ router.post('/device/:slug/alias', async (req, res) => {
 });
 
 // Simple delete group by id
-router.delete('/group/:id', async (req, res) => {
+router.delete('/group/:id', authMiddleware, adminOnly,  async (req, res) => {
   try {
     await CompatibilityGroup.findByIdAndDelete(req.params.id);
     res.json({ ok: true });
@@ -671,7 +673,7 @@ router.get('/brands', async (req, res) => {
 });
 
 // Update brand
-router.put('/brand/:id', async (req, res) => {
+router.put('/brands/:id', authMiddleware, adminOnly,  async (req, res) => {
   try {
     const name = (req.body.name || '').trim();
     if (!name) return res.status(400).json({ error: 'name required' });
@@ -686,7 +688,7 @@ router.put('/brand/:id', async (req, res) => {
 });
 
 // Delete brand
-router.delete('/brand/:id', async (req, res) => {
+router.delete('/brands/:id', authMiddleware, adminOnly,  async (req, res) => {
   try {
     await Brand.findByIdAndDelete(req.params.id);
     res.json({ ok: true });
@@ -704,7 +706,7 @@ router.get('/devices', async (req, res) => {
 });
 
 // Update device
-router.put('/device/:id', async (req, res) => {
+router.put('/devices/:id', authMiddleware, adminOnly,  async (req, res) => {
   try {
     const { name, aliases } = req.body;
     if (!name) return res.status(400).json({ error: 'device name required' });
@@ -720,7 +722,7 @@ router.put('/device/:id', async (req, res) => {
 });
 
 // Delete device
-router.delete('/device/:id', async (req, res) => {
+router.delete('/device/:id', authMiddleware, adminOnly,  async (req, res) => {
   try {
     await Device.findByIdAndDelete(req.params.id);
     res.json({ ok: true });
@@ -730,7 +732,7 @@ router.delete('/device/:id', async (req, res) => {
 
 // --- PART CATEGORY CRUD ---
 // Update part category
-router.put('/part/:id', async (req, res) => {
+router.put('/parts/:id', authMiddleware, adminOnly,  async (req, res) => {
   try {
     const name = (req.body.name || '').trim();
     if (!name) return res.status(400).json({ error: 'name required' });
@@ -745,7 +747,7 @@ router.put('/part/:id', async (req, res) => {
 });
 
 // Delete part category
-router.delete('/part/:id', async (req, res) => {
+router.delete('/parts/:id', authMiddleware, adminOnly,  async (req, res) => {
   try {
     await PartCategory.findByIdAndDelete(req.params.id);
     res.json({ ok: true });
@@ -765,7 +767,7 @@ router.get('/groups', async (req, res) => {
 });
 
 // Update group
-router.put('/group/:id', async (req, res) => {
+router.put('/groups/:id', authMiddleware, adminOnly,  async (req, res) => {
   try {
     const { models, note, source } = req.body;
 
@@ -787,6 +789,194 @@ router.put('/group/:id', async (req, res) => {
     );
     res.json(updated);
   } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+
+// -------------------- NEW: Paginated / searchable routes --------------------
+// Add these routes — they do not replace any existing ones.
+
+function escapeRegExp(string) {
+  return String(string || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function buildTextRegex(q) {
+  if (!q) return null;
+  const token = q.trim();
+  if (!token) return null;
+  return new RegExp(escapeRegExp(token), 'i');
+}
+
+/**
+ * GET /brands/paginated
+ * query: page, limit, q (search)
+ * returns: { items, total, page, totalPages }
+ */
+router.get('/brands/paginated', async (req, res) => {
+  try {
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const limit = Math.min(1000, Math.max(1, parseInt(req.query.limit, 10) || 50));
+    const q = (req.query.q || '').trim();
+    const re = buildTextRegex(q);
+
+    const filter = re ? { $or: [{ name: re }, { slug: re }] } : {};
+
+    const [total, items] = await Promise.all([
+      Brand.countDocuments(filter),
+      Brand.find(filter).skip((page - 1) * limit).limit(limit).lean().select('name slug')
+    ]);
+
+    const totalPages = Math.max(1, Math.ceil(total / limit));
+    res.json({ items, total, page, totalPages });
+  } catch (err) {
+    console.error('GET /brands/paginated', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /devices/paginated
+ * query: page, limit, q (search name/slug/aliases), brand (brand slug to filter)
+ */
+router.get('/devices/paginated', async (req, res) => {
+  try {
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const limit = Math.min(1000, Math.max(1, parseInt(req.query.limit, 10) || 50));
+    const q = (req.query.q || '').trim();
+    const brandFilter = (req.query.brand || '').trim(); // optional brand slug
+    const re = buildTextRegex(q);
+
+    const filter = re
+      ? { $or: [{ name: re }, { slug: re }, { aliases: re }] }
+      : {};
+
+    if (brandFilter) {
+      // try to resolve brand slug -> brand._id and add to filter; non-blocking if not found
+      const brandDoc = await Brand.findOne({ slug: brandFilter }).select('_id').lean();
+      if (brandDoc) filter.brand = brandDoc._id;
+      else {
+        // If brand slug doesn't match any, return empty result quickly
+        return res.json({ items: [], total: 0, page, totalPages: 0 });
+      }
+    }
+
+    const [total, items] = await Promise.all([
+      Device.countDocuments(filter),
+      Device.find(filter)
+        .populate('brand', 'name slug')
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .lean()
+        .select('name slug aliases normalized brand')
+    ]);
+
+    const totalPages = Math.max(1, Math.ceil(total / limit));
+    res.json({ items, total, page, totalPages });
+  } catch (err) {
+    console.error('GET /devices/paginated', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /parts/paginated
+ * query: page, limit, q (search name/slug/description)
+ */
+router.get('/parts/paginated', async (req, res) => {
+  try {
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const limit = Math.min(1000, Math.max(1, parseInt(req.query.limit, 10) || 50));
+    const q = (req.query.q || '').trim();
+    const re = buildTextRegex(q);
+
+    const filter = re ? { $or: [{ name: re }, { slug: re }, { description: re }] } : {};
+
+    const [total, items] = await Promise.all([
+      PartCategory.countDocuments(filter),
+      PartCategory.find(filter).skip((page - 1) * limit).limit(limit).lean().select('name slug description')
+    ]);
+
+    const totalPages = Math.max(1, Math.ceil(total / limit));
+    res.json({ items, total, page, totalPages });
+  } catch (err) {
+    console.error('GET /parts/paginated', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /groups/paginated
+ * query: page, limit, q (search part name/slug, device name/slug, note, source)
+ * This uses aggregation + lookups so you can search on joined fields.
+ */
+router.get('/groups/paginated', async (req, res) => {
+  try {
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const limit = Math.min(500, Math.max(1, parseInt(req.query.limit, 10) || 50));
+    const q = (req.query.q || '').trim();
+    const re = buildTextRegex(q);
+
+    const partColl = PartCategory.collection.name;
+    const deviceColl = Device.collection.name;
+
+    const pipeline = [
+      // attach part
+      { $lookup: { from: partColl, localField: 'partId', foreignField: '_id', as: 'part' } },
+      { $unwind: { path: '$part', preserveNullAndEmptyArrays: true } },
+      // attach devices
+      { $lookup: { from: deviceColl, localField: 'models', foreignField: '_id', as: 'devices' } },
+    ];
+
+    if (re) {
+      pipeline.push({
+        $match: {
+          $or: [
+            { 'part.name': re },
+            { 'part.slug': re },
+            { 'devices.slug': re },
+            { 'devices.name': re },
+            { note: re },
+            { source: re }
+          ]
+        }
+      });
+    }
+
+    // facet -> items + total
+    pipeline.push({
+      $facet: {
+        items: [
+          { $sort: { _id: 1 } },
+          { $skip: (page - 1) * limit },
+          { $limit: limit },
+          // project friendly output
+          {
+            $project: {
+              _id: 1,
+              part: { _id: '$part._id', name: '$part.name', slug: '$part.slug' },
+              devices: { $map: { input: '$devices', as: 'd', in: { _id: '$$d._id', name: '$$d.name', slug: '$$d.slug' } } },
+              note: 1,
+              source: 1,
+              tags: 1,
+              confidence: 1,
+              createdAt: 1,
+              updatedAt: 1
+            }
+          }
+        ],
+        total: [{ $count: 'count' }]
+      }
+    });
+
+    const agg = await CompatibilityGroup.aggregate(pipeline).allowDiskUse(true).exec();
+    const items = (agg[0] && agg[0].items) || [];
+    const total = (agg[0] && agg[0].total && agg[0].total[0] && agg[0].total[0].count) ? agg[0].total[0].count : 0;
+    const totalPages = Math.max(1, Math.ceil(total / limit));
+
+    res.json({ items, total, page, totalPages });
+  } catch (err) {
+    console.error('GET /groups/paginated', err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 

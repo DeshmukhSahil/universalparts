@@ -276,6 +276,125 @@ exports.verifyEmailOTP = async (req, res) => {
   }
 };
 
+exports.registerAdmin= async (req, res) => {
+  try {
+    const { firstName, lastName, email, password, phone } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
+
+    // normalize email
+    const normalizedEmail = String(email).trim().toLowerCase();
+
+    // check existing
+    const exists = await User.findOne({ email: normalizedEmail }).exec();
+    if (exists) {
+      return res.status(409).json({ message: 'Email already registered' });
+    }
+
+    // hash password
+    const hash = await bcrypt.hash(password, 10);
+
+    const user = new User({
+      firstName: firstName || '',
+      lastName: lastName || '',
+      email: normalizedEmail,
+      password: hash,
+      role: 'admin',
+      isEmailVerified: true,   // consider true so admin can sign-in immediately
+      isPhoneVerified: false,
+      // add other defaults as your User model requires
+    });
+
+    if (phone) user.phone = phone;
+
+    await user.save();
+
+    // prepare safe output (remove sensitive fields)
+    const out = user.toObject ? user.toObject() : JSON.parse(JSON.stringify(user));
+    delete out.password;
+    // remove sensitive OTP fields if present
+    delete out.emailOTP;
+    delete out.emailOTPExpiresAt;
+
+    // OPTIONAL: auto-login by issuing JWT cookie — uncomment if desired
+    /*
+    const token = jwt.sign({ sub: out._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    res.cookie('token', token, {
+      httpOnly: true,
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+    */
+
+    return res.status(201).json({ user: out });
+  } catch (err) {
+    console.error('registerAdmin error', err);
+    return res.status(500).json({ message: err.message || 'Server error' });
+  }
+}
+
+exports.forgotPassword = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      // Don’t reveal that email doesn’t exist
+      return res.json({ message: "If an account exists, a reset link was sent." });
+    }
+
+    // generate reset token
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const resetTokenHash = crypto.createHash("sha256").update(resetToken).digest("hex");
+    user.resetPasswordToken = resetTokenHash;
+    user.resetPasswordExpire = Date.now() + 15 * 60 * 1000; // 15 minutes
+    await user.save();
+
+    const resetUrl = `http://localhost:3000/reset-password/${resetToken}`;
+
+    await sendEmail({
+      to: user.email,
+      subject: "Password Reset",
+      text: `Click here to reset your password: ${resetUrl}`,
+      html: `<p>Click <a href="${resetUrl}">here</a> to reset your password.</p>`,
+    });
+
+    res.json({ message: "If an account exists, a reset link was sent." });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.resetPassword = async (req, res) => {
+  const { token } = req.params;
+  const { password } = req.body;
+  try {
+    const resetTokenHash = crypto.createHash("sha256").update(token).digest("hex");
+    const user = await User.findOne({
+      resetPasswordToken: resetTokenHash,
+      resetPasswordExpire: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired token" });
+    }
+
+    user.password = password; // your User model should hash this
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save();
+
+    res.json({ message: "Password reset successful, you can now log in." });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
 
 exports.googleOAuth = async (req, res) => {
   try {

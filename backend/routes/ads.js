@@ -10,6 +10,8 @@ const {
   recordImpression,
   recordClick
 } = require('../controllers/adsController');
+const { authMiddleware } = require('../middleware/auth');
+const { adminOnly } = require('../middleware/adminOnly');
 
 const router = express.Router();
 
@@ -38,7 +40,7 @@ const upload = multer({
 });
 
 // Admin upload route (protected)
-router.post('/upload', upload.single('file'), (req, res) => {
+router.post('/upload', authMiddleware, adminOnly, upload.single('file'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
   const publicUrl = `/uploads/ads/${req.file.filename}`;
   res.json({ url: publicUrl, filename: req.file.filename });
@@ -46,10 +48,24 @@ router.post('/upload', upload.single('file'), (req, res) => {
 
 // Ads public API
 router.get('/', getAdsForPlacement);
-router.post('/',createAd);
+router.post('/', authMiddleware, adminOnly, createAd);
 
 // Tracking endpoints
 router.post('/:id/impression', recordImpression);
 router.post('/:id/click', recordClick);
+
+router.delete('/:id', authMiddleware, adminOnly,  async (req, res) => {
+  try {
+    const { id } = req.params;
+    // delegate to controller (keeps routes thin)
+    const { deleteAd } = require('../controllers/adsController');
+    const result = await deleteAd(id);
+    if (!result) return res.status(404).json({ error: 'Ad not found' });
+    res.status(204).end();
+  } catch (err) {
+    console.error('delete ad error', err);
+    res.status(500).json({ error: 'server error' });
+  }
+});
 
 module.exports = router;

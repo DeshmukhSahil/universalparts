@@ -86,3 +86,13 @@ desktop.ini
 *.gz
 *.zip
 *.tar
+
+# Ignore specific files
+/frontend/replay_pid5020
+/frontend/replay_pid9288
+/frontend/capacitor.config
+
+# Ignore mobile platform folders
+/frontend/android/
+/frontend/ios/
+/frontend/build/

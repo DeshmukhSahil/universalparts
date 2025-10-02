@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const Announcement = require('../models/Announcement');
+const { authMiddleware } = require('../middleware/auth');
+const { adminOnly } = require('../middleware/adminOnly');
 
 // PUBLIC: get active announcements (sorted: pinned + newest)
 router.get('/', async (req, res) => {
@@ -20,7 +22,7 @@ router.get('/', async (req, res) => {
 });
 
 // CREATE (temporarily public — no auth)
-router.post('/', async (req, res) => {
+router.post('/', authMiddleware, adminOnly,  async (req, res) => {
   try {
     const { title, message, pinned, startsAt, expiresAt, active } = req.body;
     const ann = new Announcement({
@@ -34,8 +36,7 @@ router.post('/', async (req, res) => {
 
     await ann.save();
 
-    // If using socket.io, emit creation
-    if (req.app.get('io')) req.app.get('io').emit('announcement:new', ann);
+    // NOTE: socket.io emits removed (not using socket.io)
 
     res.status(201).json(ann);
   } catch (err) {
@@ -44,12 +45,14 @@ router.post('/', async (req, res) => {
 });
 
 // UPDATE (temporarily public — no auth)
-router.put('/:id', async (req, res) => {
+router.put('/:id', authMiddleware, adminOnly,  async (req, res) => {
   try {
     const update = { ...req.body, updatedAt: Date.now() };
     const ann = await Announcement.findByIdAndUpdate(req.params.id, update, { new: true });
     if (!ann) return res.status(404).json({ error: 'Not found' });
-    if (req.app.get('io')) req.app.get('io').emit('announcement:update', ann);
+
+    // NOTE: socket.io emits removed (not using socket.io)
+
     res.json(ann);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -57,11 +60,33 @@ router.put('/:id', async (req, res) => {
 });
 
 // DELETE (soft delete: set active=false) (temporarily public — no auth)
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authMiddleware, adminOnly,  async (req, res) => {
   try {
-    const ann = await Announcement.findByIdAndUpdate(req.params.id, { active: false }, { new: true });
-    if (req.app.get('io')) req.app.get('io').emit('announcement:delete', { id: req.params.id });
-    res.json({ message: 'Deleted', ann });
+    const ann = await Announcement.findByIdAndUpdate(
+      req.params.id,
+      { active: false, updatedAt: Date.now() },
+      { new: true }
+    );
+    if (!ann) return res.status(404).json({ error: 'Not found' });
+
+    // NOTE: socket.io emits removed (not using socket.io)
+
+    res.json({ message: 'Soft-deleted', ann });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PERMANENT DELETE (hard delete) — permanently removes announcement from DB
+// Usage: DELETE /api/announcements/:id/permanent
+router.delete('/:id/permanent', authMiddleware, adminOnly,  async (req, res) => {
+  try {
+    const ann = await Announcement.findByIdAndDelete(req.params.id);
+    if (!ann) return res.status(404).json({ error: 'Not found' });
+
+    // If you need to do cleanup (files, linked resources), do it here.
+
+    res.json({ message: 'Permanently deleted', ann });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

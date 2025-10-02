@@ -72,9 +72,51 @@ async function recordClick(req, res) {
   }
 }
 
+async function deleteAd(id) {
+  const Ad = require('../models/Ad');
+  const mongoose = require('mongoose');
+
+  if (!mongoose.Types.ObjectId.isValid(id)) return false;
+
+  const ad = await Ad.findById(id).exec();
+  if (!ad) return false;
+
+  // If ad.imageUrl is a local path like "/uploads/ads/filename.jpg", delete the file.
+  try {
+    if (ad.imageUrl && typeof ad.imageUrl === 'string') {
+      // Only delete when it's a local path (not an external CDN/http url)
+      if (!/^https?:\/\//i.test(ad.imageUrl) && ad.imageUrl.startsWith('/uploads/ads/')) {
+        // sanitize & resolve
+        const filename = path.basename(ad.imageUrl);
+        const filePath = path.join(UPLOAD_DIR, filename);
+
+        // Extra check: ensure final path is inside UPLOAD_DIR (prevent path traversal)
+        if (!filePath.startsWith(UPLOAD_DIR)) {
+          console.warn('Refusing to delete file outside uploads dir:', filePath);
+        } else {
+          // attempt unlink, but don't fail entire op if unlink fails
+          try {
+            await fs.unlink(filePath);
+          } catch (e) {
+            // file may already be missing — log and continue
+            console.warn('Could not remove ad file:', filePath, e.message);
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('Error while attempting to remove ad file', err);
+  }
+
+  // remove DB document
+  await Ad.findByIdAndDelete(id).exec();
+  return true;
+}
+
 module.exports = {
   getAdsForPlacement,
   createAd,
   recordImpression,
-  recordClick
+  recordClick,
+  deleteAd,
 };

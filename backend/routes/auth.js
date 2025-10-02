@@ -12,8 +12,13 @@ router.post("/verify-email-otp", auth.verifyEmailOTP);
 router.post("/logout", auth.logout);
 router.post("/google", auth.googleOAuth);
 
+router.post("/forgot-password", auth.forgotPassword);
+router.post("/reset-password/:token", auth.resetPassword);
+
 // phone verification (client should obtain firebaseIdToken after phone auth)
 router.post("/verify-phone", auth.verifyPhoneToken);
+
+router.post('/register-admin', auth.registerAdmin);
 
 // protected
 router.get("/me", authMiddleware, auth.me);
