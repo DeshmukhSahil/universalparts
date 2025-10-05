@@ -26,13 +26,7 @@ try {
 const app = express();
 
 // --- DEBUG LOGGING: show every incoming request ---
-app.use((req, res, next) => {
-  console.log(new Date().toISOString(), req.method, req.originalUrl, 'headers:', {
-    origin: req.headers.origin,
-    'content-type': req.headers['content-type'],
-  });
-  next();
-});
+
 
 // create uploads folder if missing
 const UPLOAD_DIR = path.join(process.cwd(), 'public', 'uploads', 'ads');
@@ -60,20 +54,10 @@ app.options('/api/chatbot', cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 
-// --- DEBUG: show what the router export looks like ---
-console.log('chatbotRouter type:', typeof chatbotRouter);
-try {
-  console.log('chatbotRouter keys:', Object.keys(chatbotRouter || {}));
-  console.log('chatbotRouter.stack length:', chatbotRouter && chatbotRouter.stack && chatbotRouter.stack.length);
-} catch (e) {
-  console.log('chatbotRouter debug error:', e && e.message);
-}
+
 
 // quick inline test route (bypass router) to prove express receives POST json
-app.post('/api/chatbot-inline', (req, res) => {
-  console.log('INLINE handler got body:', req.body);
-  res.json({ response: 'inline OK' });
-});
+
 
 // register routes (chatbot mounted early)
 app.use('/api/announcements', announcementsRouter);

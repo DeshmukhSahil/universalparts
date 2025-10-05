@@ -10,14 +10,7 @@ const authModule = require("../middleware/auth");
 const authMiddleware = authModule && authModule.authMiddleware;
 
 // Diagnostic log
-console.log("subscription route handlers:",
-  {
-    authMiddleware: typeof authMiddleware,
-    createOrder: typeof (sub && sub.createOrder),
-    verifyPaymentSignature: typeof (sub && sub.verifyPaymentSignature),
-    webhookHandler: typeof (sub && sub.webhookHandler),
-  }
-);
+
 
 // Fail fast with helpful message if any handler missing
 if (typeof authMiddleware !== "function") {
