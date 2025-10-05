@@ -227,7 +227,7 @@ export default function SearchBar({
                   onClick={() => choose(s)}
                 >
                   <div className={styles.brandRow}>
-                    <span className={styles.brandName}>{s.brand?.name || ''}</span>
+                    {/* <span className={styles.brandName}>{s.brand?.name || ''}</span> */}
                     <span className={styles.modelName}>{s.name}</span>
                   </div>
                   {s.aliases?.length ? <div className={styles.alias}>{s.aliases[0]}</div> : null}

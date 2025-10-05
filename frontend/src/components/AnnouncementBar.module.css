@@ -15,6 +15,8 @@
   --bg-primary: #ffffff;
 }
 
+/* -------------------- BASE LAYOUT -------------------- */
+
 /* Base - use CSS Grid for predictable responsive reflow */
 .ann-bar {
   width: 100%;
@@ -32,6 +34,8 @@
   position: relative;
   transition: transform 0.18s ease, box-shadow 0.18s ease;
   overflow: visible;
+  /* reserve space on right so absolutely-positioned close button doesn't cover content */
+  padding-right: 56px;
 }
 
 /* thin accent line */
@@ -46,13 +50,16 @@
   opacity: 0.9;
 }
 
+/* -------------------- CONTENT GROUPS -------------------- */
+
 /* Content column (badge + text) groups */
 .ann-content {
   grid-column: 1 / span 2;
   display: flex;
   gap: 16px;
   align-items: flex-start;
-  min-width: 0;
+  min-width: 0; /* allow truncation */
+  flex: 1 1 auto;
 }
 
 /* Badge (left) */
@@ -94,9 +101,8 @@
   flex-direction: column;
   gap: 6px;
   min-width: 0; /* important to enable truncation */
+  flex: 1 1 auto;
 }
-
-
 
 /* clamp font sizes with clamp() */
 .ann-text {
@@ -141,14 +147,19 @@
   max-height: calc(1.3em * 2); /* for browsers that don't support -webkit-line-clamp or line-clamp */
 }
 
+/* -------------------- META / CTA -------------------- */
+
 /* Meta (right column) */
 .ann-meta {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: 10px;
   grid-column: 3 / 4;
   min-width: 0;
+  box-sizing: border-box;
+  z-index: 2;
+  flex: 0 0 220px; /* default fixed column but allowed to be overridden by media queries */
 }
 
 /* row within meta */
@@ -178,6 +189,8 @@
   border-radius: 10px;
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow);
+  min-width: 0;
+  flex: 0 0 auto;
 }
 
 /* Buttons */
@@ -197,6 +210,7 @@
   font-weight: 600;
   font-size: 13px;
   min-width: 38px;
+  white-space: nowrap;
 }
 
 .btn:hover {
@@ -240,7 +254,10 @@
     grid-template-columns: auto 1fr 180px;
     padding: 12px 16px;
   }
-  .ann-meta { gap: 8px; }
+  .ann-meta {
+    gap: 8px;
+    flex: 0 0 180px;
+  }
 }
 
 /* Tablet: stack meta below content if needed */
@@ -250,6 +267,7 @@
     grid-auto-rows: auto;
     padding: 12px;
     gap: 12px;
+    padding-right: 48px; /* still leave some room for close button */
   }
 
   .ann-content { grid-column: 1 / -1; }
@@ -260,72 +278,18 @@
     justify-content: space-between;
     gap: 8px;
     margin-top: 6px;
+    flex: 0 0 auto;
+    width: 100%;
   }
 
   /* ensure announcements show full CTA but compact */
-  .ann-cta { justify-content: center; width: 100%; }
+  .ann-cta { justify-content: center; width: 100%; box-sizing: border-box; }
   .btn { padding: 8px; font-size: 13px; min-width: 44px; }
   .meta-date { white-space: normal; text-align: left; }
 }
 
 /* Small phones: column layout, single-column stack */
-@media (max-width: 480px) {
-  .ann-bar {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    padding: 12px;
-    gap: 10px;
-  }
 
-  .ann-content {
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-  }
-
-  .ann-badge { min-width: 40px; height: 40px; border-radius: 8px; font-size: 18px; }
-
-  .text-column { gap: 6px; }
-
-  .ann-text {
-    -webkit-line-clamp: 2;   /* existing */
-    line-clamp: 2;           /* added standard property */
-    font-size: 15px;
-    /* update fallback height for 2 lines on small screens */
-    max-height: calc(1.18em * 2);
-  }
-
-  .message-body {
-    -webkit-line-clamp: 3;   /* existing */
-    line-clamp: 3;           /* added standard property */
-    font-size: 13px;
-    max-height: calc(1.3em * 3);
-  }
-
-  /* Meta & CTA become stacked but compact; hide non-essential text */
-  .ann-meta {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-  }
-
-  /* hide the full date, show only on hover/focus for screen readers */
-  .hide-on-mobile { display: none; }
-
-  .ann-cta {
-    display: flex;
-    gap: 6px;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-
-  .btn { flex: 1 1 48%; min-width: 44px; padding: 8px; font-size: 14px; }
-
-  /* If you prefer icon-only on tiny screens, you can replace the text with small icons */
-}
 
 /* reduced-motion preference */
 @media (prefers-reduced-motion: reduce) {
@@ -336,10 +300,12 @@
   .ann-bar:hover { transform: none; }
 }
 
+/* ------------------ CLOSE BUTTON ------------------ */
+
 /* small, unobtrusive cross button (dismiss current announcement) */
 .closeBtn {
   position: absolute;
-  top: 10px;
+  top: 8px;
   right: 12px;
   height: 36px;
   width: 36px;
@@ -354,6 +320,7 @@
   color: var(--text-secondary); /* subtle by default */
   transition: background 0.12s ease, color 0.12s ease, transform 0.06s ease;
   z-index: 6;
+  box-sizing: border-box;
 }
 
 /* hover/focus states */
@@ -384,3 +351,11 @@
   }
 }
 
+/* ------------------ DEBUG HELPERS (optional) ------------------ */
+
+/* Uncomment while debugging to see layout boundaries */
+/*
+.ann-meta { outline: 1px dashed rgba(124,58,237,0.18); }
+.ann-content { outline: 1px dashed rgba(6,214,160,0.12); }
+.closeBtn { outline: 1px dashed rgba(14,22,40,0.06); }
+*/

@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { useTheme } from "./contexts/ThemeContext";
 import { useAuth } from "./contexts/AuthContext";
+import { StatusBar, Style } from "@capacitor/status-bar";
+import { Capacitor } from "@capacitor/core";
 
 import SearchBar from "./components/SearchBar";
 import Results from "./components/Results";
@@ -40,10 +42,77 @@ function ThemeToggle() {
 }
 
 function MainApp() {
+    const { isDarkMode } = useTheme()
+  const [isNativeMobile, setIsNativeMobile] = useState(false);
+  // statusFixed = true means native layout was adjusted (no spacer needed)
+  const [statusFixed, setStatusFixed] = useState(false);
+  // detect platform once
+  useEffect(() => {
+    try {
+      const p = Capacitor.getPlatform(); // 'ios' | 'android' | 'web'
+      if (p === "ios" || p === "android") setIsNativeMobile(true);
+    } catch (e) {
+      // ignore
+    }
+  }, []);
+
+  // Try to configure native status bar. If it succeeds, we hide spacer.
+  useEffect(() => {
+    if (!isNativeMobile) return;
+
+    async function configureStatusBar() {
+      try {
+        // Read header background from CSS var so it follows dark/light theme
+        const style = getComputedStyle(document.documentElement);
+        let headerBg = style.getPropertyValue("--header-bg")?.trim() || (isDarkMode ? "#1e293b" : "#ffffff");
+
+        // Sanitize value (remove quotes/spaces)
+        headerBg = headerBg.replace(/['"]/g, "").trim();
+
+        // If value is rgb(...) convert to hex (rare) — quick conversion
+        if (headerBg.startsWith("rgb")) {
+          const nums = headerBg.match(/\d+/g)?.slice(0, 3) || [255, 255, 255];
+          headerBg = nums
+            .map((n) => Number(n).toString(16).padStart(2, "0"))
+            .join("");
+        } else {
+          // if headerBg starts with '#', remove it (StatusBar expects no #)
+          headerBg = headerBg.startsWith("#") ? headerBg.slice(1) : headerBg;
+        }
+
+        // Ask native not to overlay the webview
+        await StatusBar.setOverlaysWebView({ overlay: false });
+
+        // Set native status bar background (hex without '#')
+        await StatusBar.setBackgroundColor({ color: headerBg });
+
+        // Decide icon color (light/dark) from luminance
+        const hexToRgb = (h) => {
+          if (h.length === 3) {
+            return h.split("").map((c) => parseInt(c + c, 16));
+          }
+          return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
+        };
+        const [r, g, b] = hexToRgb(headerBg.length === 6 ? headerBg : "ffffff");
+        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        const useLightContent = luminance < 0.5; // darker bg -> use light content (icons/text)
+
+        await StatusBar.setStyle({ style: useLightContent ? Style.Light : Style.Dark });
+
+        // native fix applied -> hide spacer
+        setStatusFixed(true);
+      } catch (e) {
+        console.warn("StatusBar config failed", e);
+        // keep spacer as fallback
+        setStatusFixed(false);
+      }
+    }
+
+    configureStatusBar();
+  }, [isNativeMobile, isDarkMode]);
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
-  const { isDarkMode } = useTheme();
 
   // ---- search state ----
   const [device, setDevice] = useState(null);
@@ -178,6 +247,9 @@ function MainApp() {
 
   return (
     <div className={styles.page}>
+      {isNativeMobile && !statusFixed && (
+        <div className={styles.statusSpacer} aria-hidden="true" />
+      )}
       <header className={styles.header}>
         {/* BRAND / LEFT */}
         <div className={styles.headerLeft}>

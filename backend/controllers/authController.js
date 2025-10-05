@@ -26,8 +26,8 @@ const COOKIE_NAME = process.env.JWT_COOKIE_NAME || "token";
 const COOKIE_MAX_AGE = process.env.JWT_EXPIRES_MS ? parseInt(process.env.JWT_EXPIRES_MS, 10) : 7 * 24 * 60 * 60 * 1000;
 const cookieOptions = {
   httpOnly: true,
-  secure: false,                       // false on localhost (dev), true in production (HTTPS)
-  sameSite: "lax",    // "none" in prod if cross-site, "lax" is safe in dev
+  secure: true,                       // false on localhost (dev), true in production (HTTPS)
+  sameSite: "none",    // "none" in prod if cross-site, "lax" is safe in dev
   maxAge: COOKIE_MAX_AGE,
   path: "/"
 };

@@ -1,6 +1,37 @@
 /* App.module.css - Updated Header Styles */
+/* global or App.module.css */
+:root {
+  /* fallback if env isn't available */
+  --safe-top: env(safe-area-inset-top, 0px);
+}
+
+.statusSpacer {
+  width: 100%;
+  height: var(--cap-safe-top, 24px);
+  min-height: 24px;
+  pointer-events: none;
+  background: var(--header-bg);        /* IMPORTANT: follows light/dark theme */
+  transition: background-color 0.25s ease, height 0.15s ease;
+  display: block;
+  z-index: 50; /* sits above page but below header if needed */
+}
+
+/* If you want the whole page pushed down */
+.page {
+  /* ensure the page accounts for the notch/status bar */
+  padding-top: env(safe-area-inset-top);
+  padding-top: constant(safe-area-inset-top);
+  /* older iOS fallback */
+  min-height: 100dvh;
+  /* safer full-height in mobile browsers and WebView */
+  box-sizing: border-box;
+}
+
 
 .header {
+  padding-top: calc(env(safe-area-inset-top) + 8px);
+  /* tweak 8px as needed */
+  padding-top: calc(constant(safe-area-inset-top) + 8px);
   height: 64px;
   display: flex;
   justify-content: space-between;
@@ -12,14 +43,16 @@
 }
 
 .brandLogo {
-  height: 40px; /* adjust to taste */
+  height: 40px;
+  /* adjust to taste */
   width: auto;
   display: inline-block;
 }
 
 .srOnly {
   position: absolute !important;
-  height: 1px; width: 1px;
+  height: 1px;
+  width: 1px;
   overflow: hidden;
   clip: rect(1px, 1px, 1px, 1px);
   white-space: nowrap;
@@ -29,9 +62,9 @@
 }
 
 
-.headerLeft { 
-  display: flex; 
-  align-items: center; 
+.headerLeft {
+  display: flex;
+  align-items: center;
   flex-shrink: 0;
 }
 
@@ -103,7 +136,7 @@
   justify-content: center;
   border-radius: 8px;
   font-weight: 700;
-  background: linear-gradient(135deg,#4285F4,#6C43D8);
+  background: linear-gradient(135deg, #4285F4, #6C43D8);
   color: white;
   font-size: 18px;
 }
@@ -151,26 +184,26 @@
     padding: 0 16px;
     gap: 12px;
   }
-  
+
   .headerRight {
     gap: 6px;
   }
-  
+
   .headerLink {
     font-size: 13px;
     padding: 6px 8px;
   }
-  
+
   .brandText {
     font-size: 16px;
   }
-  
+
   .brandMark {
     width: 32px;
     height: 32px;
     font-size: 16px;
   }
-  
+
   .themeToggle {
     font-size: 16px;
     padding: 6px;
@@ -182,22 +215,22 @@
     padding: 0 12px;
     gap: 8px;
   }
-  
+
   .headerLink {
     font-size: 12px;
     padding: 6px 6px;
   }
-  
+
   .brandText {
     font-size: 14px;
   }
-  
+
   .brandMark {
     width: 28px;
     height: 28px;
     font-size: 14px;
   }
-  
+
   .themeToggle {
     font-size: 14px;
     padding: 5px;
@@ -209,27 +242,27 @@
     padding: 0 8px;
     gap: 6px;
   }
-  
+
   .headerLink {
     font-size: 11px;
     padding: 5px 4px;
   }
-  
+
   .brandText {
     font-size: 13px;
   }
-  
+
   .brandMark {
     width: 24px;
     height: 24px;
     font-size: 12px;
   }
-  
+
   .themeToggle {
     font-size: 13px;
     padding: 4px;
   }
-  
+
   .userAvatar,
   .userIcon {
     width: 24px;
@@ -242,11 +275,11 @@
     font-size: 10px;
     padding: 4px 3px;
   }
-  
+
   .brandText {
     font-size: 12px;
   }
-  
+
   .brandMark {
     width: 22px;
     height: 22px;
@@ -305,18 +338,41 @@
   display: inline-block;
 }
 
-.logo span { 
-  display: inline-block; 
-  transform-origin: center; 
+.logo span {
+  display: inline-block;
+  transform-origin: center;
 }
 
 /* color tokens (inspired by google palette but unique) */
-.g1 { color: #4285F4; } /* blue */
-.g2 { color: #DB4437; } /* red */
-.g3 { color: #F4B400; } /* yellow */
-.g4 { color: #0F9D58; } /* green */
-.g5 { color: #6C43D8; } /* purple */
-.sep { width: 6px; display:inline-block; }
+.g1 {
+  color: #4285F4;
+}
+
+/* blue */
+.g2 {
+  color: #DB4437;
+}
+
+/* red */
+.g3 {
+  color: #F4B400;
+}
+
+/* yellow */
+.g4 {
+  color: #0F9D58;
+}
+
+/* green */
+.g5 {
+  color: #6C43D8;
+}
+
+/* purple */
+.sep {
+  width: 6px;
+  display: inline-block;
+}
 
 /* tagline under the logo */
 .tagline {
@@ -328,7 +384,7 @@
 /* search wrap centers the search bar and buttons */
 .searchWrap {
   width: 100%;
-  display:flex;
+  display: flex;
   flex-direction: column;
   align-items: center;
   gap: 12px;
@@ -337,7 +393,7 @@
 
 /* buttons row like google's two buttons */
 .buttonsRow {
-  display:flex;
+  display: flex;
   gap: 12px;
   margin-top: 6px;
   align-items: center;
@@ -355,9 +411,9 @@
   box-shadow: var(--shadow);
 }
 
-.primaryBtn:hover { 
-  box-shadow: var(--shadow-lg); 
-  transform: translateY(-1px); 
+.primaryBtn:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
 }
 
 .secondaryBtn {
@@ -369,9 +425,9 @@
   cursor: pointer;
 }
 
-.secondaryBtn:hover { 
+.secondaryBtn:hover {
   color: var(--text-primary);
-  text-decoration: underline; 
+  text-decoration: underline;
 }
 
 /* results area below fold */
@@ -391,16 +447,16 @@
   background: var(--footer-bg);
   border-top: 1px solid var(--border-color);
   padding: 12px 24px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   font-size: 14px;
   color: var(--text-secondary);
 }
 
 /* footer links */
 .footerRight {
-  display:flex;
+  display: flex;
   gap: 14px;
 }
 
@@ -454,24 +510,24 @@
 
 /* Responsive styles for main content */
 @media (max-width: 768px) {
-  .logo { 
-    font-size: 44px; 
+  .logo {
+    font-size: 44px;
   }
-  
+
   .main {
     padding: 32px 16px 20px;
   }
 }
 
 @media (max-width: 520px) {
-  .logo { 
-    font-size: 36px; 
+  .logo {
+    font-size: 36px;
   }
-  
-  .tagline { 
-    font-size: 13px; 
+
+  .tagline {
+    font-size: 13px;
   }
-  
+
   .resultsArea {
     padding: 0 8px;
     margin: 20px auto 40px;
@@ -479,11 +535,11 @@
 }
 
 @media (max-width: 420px) {
-  .primaryBtn { 
-    padding: 9px 10px; 
+  .primaryBtn {
+    padding: 9px 10px;
     font-size: 13px;
   }
-  
+
   .footer {
     flex-direction: column;
     gap: 8px;

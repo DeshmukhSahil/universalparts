@@ -465,7 +465,7 @@ export default function Results({
 
                 {/* part badges */}
                 {/* part badges */}
-                <div className={styles.partBadges}>
+                {/* <div className={styles.partBadges}>
                   {(
                     // prefer explicit _parts; otherwise try to synthesize from g.partId
                     (Array.isArray(g._parts) && g._parts.length
@@ -497,7 +497,7 @@ export default function Results({
                       {p.name}
                     </button>
                   ))}
-                </div>
+                </div> */}
 
 
                 {/* models grid (collapsible on mobile) */}

@@ -88,9 +88,9 @@ desktop.ini
 *.tar
 
 # Ignore specific files
-/frontend/replay_pid5020
-/frontend/replay_pid9288
-/frontend/capacitor.config
+/frontend/replay_pid5020.log
+/frontend/replay_pid9288.log
+/frontend/capacitor.config.ts
 
 # Ignore mobile platform folders
 /frontend/android/
