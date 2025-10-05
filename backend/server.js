@@ -38,7 +38,7 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'public', 'uploads')
 }));
 
 // CORS configuration
-const FRONTEND_ORIGIN = ["http://localhost:3000","http://localhost:3001","https://universalparts.vercel.app"];
+const FRONTEND_ORIGIN = ["http://localhost:3000","http://localhost:3001","https://universalparts.vercel.app", "capacitor://localhost","http://localhost"];
 const corsOptions = {
   origin: FRONTEND_ORIGIN,
   credentials: true,
