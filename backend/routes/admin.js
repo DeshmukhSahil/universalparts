@@ -721,6 +721,29 @@ router.put('/devices/:id', authMiddleware, adminOnly,  async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// DELETE /devices/:id  — permanent delete
+router.delete('/devices/:id', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // validate id early
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'invalid device id' });
+    }
+
+    const device = await Device.findByIdAndDelete(id);
+
+    if (!device) return res.status(404).json({ error: 'device not found' });
+
+    // OPTIONAL: any additional cleanup (logs, references) can go here
+
+    res.status(200).json({ message: 'device deleted', deviceId: id });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 // Delete device
 router.delete('/device/:id', authMiddleware, adminOnly,  async (req, res) => {
   try {
