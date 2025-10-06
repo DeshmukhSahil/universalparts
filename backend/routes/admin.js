@@ -19,7 +19,7 @@ const { adminOnly } = require('../middleware/adminOnly');
 // Helper to safe JSON parse
 function tryParseJSON(str) {
   if (!str) return null;
-  try { return JSON.parse(str); } catch(e) { return null; }
+  try { return JSON.parse(str); } catch (e) { return null; }
 }
 
 
@@ -38,7 +38,7 @@ router.get('/export/debug', authMiddleware, adminOnly, async (req, res) => {
 
     // ---- Brands ----
     const brandsSheet = workbook.addWorksheet('Brands');
-    brandsSheet.addRow(['ACTION','id','name','slug','meta']);
+    brandsSheet.addRow(['ACTION', 'id', 'name', 'slug', 'meta']);
     for (const b of brands) {
       brandsSheet.addRow([
         '',
@@ -51,7 +51,7 @@ router.get('/export/debug', authMiddleware, adminOnly, async (req, res) => {
 
     // ---- Devices ----
     const devicesSheet = workbook.addWorksheet('Devices');
-    devicesSheet.addRow(['ACTION','id','brandId','brandSlug','brandName','name','slug','aliases','normalized','meta']);
+    devicesSheet.addRow(['ACTION', 'id', 'brandId', 'brandSlug', 'brandName', 'name', 'slug', 'aliases', 'normalized', 'meta']);
     for (const d of devices) {
       const aliases = Array.isArray(d.aliases) ? d.aliases.join(', ') : '';
       const brandId = d.brand?._id ? d.brand._id.toString() : (d.brand ? d.brand.toString() : '');
@@ -73,7 +73,7 @@ router.get('/export/debug', authMiddleware, adminOnly, async (req, res) => {
 
     // ---- Parts ----
     const partsSheet = workbook.addWorksheet('Parts');
-    partsSheet.addRow(['ACTION','id','name','slug','description','meta']);
+    partsSheet.addRow(['ACTION', 'id', 'name', 'slug', 'description', 'meta']);
     for (const p of parts) {
       partsSheet.addRow([
         '',
@@ -87,13 +87,13 @@ router.get('/export/debug', authMiddleware, adminOnly, async (req, res) => {
 
     // ---- Groups ----
     const groupsSheet = workbook.addWorksheet('Groups');
-    groupsSheet.addRow(['ACTION','id','partId','partSlug','partName','modelsIds','modelsSlugs','note','source','tags','confidence']);
+    groupsSheet.addRow(['ACTION', 'id', 'partId', 'partSlug', 'partName', 'modelsIds', 'modelsSlugs', 'note', 'source', 'tags', 'confidence']);
     for (const g of groups) {
       const modelIds = Array.isArray(g.models)
         ? g.models.map(m => m._id?.toString() || m.toString()).join(', ')
         : '';
       const modelSlugs = Array.isArray(g.models)
-        ? g.models.map(m => m.slug || m.name || (m._id?.toString()||'')).join(', ')
+        ? g.models.map(m => m.slug || m.name || (m._id?.toString() || '')).join(', ')
         : '';
       const partId = g.partId?._id ? g.partId._id.toString() : (g.partId ? g.partId.toString() : '');
       const partSlug = g.partId?.slug || '';
@@ -163,14 +163,14 @@ router.get('/export/all', authMiddleware, adminOnly, async (req, res) => {
 
     // Brands sheet
     const brandsSheet = workbook.addWorksheet('Brands');
-    brandsSheet.addRow(['ACTION','id','name','slug','meta']);
+    brandsSheet.addRow(['ACTION', 'id', 'name', 'slug', 'meta']);
     for (const b of brands) {
       brandsSheet.addRow(['', b._id?.toString(), b.name, b.slug, b.meta ? JSON.stringify(b.meta) : '']);
     }
 
     // Devices sheet — include brandId + brandSlug + brandName for readability
     const devicesSheet = workbook.addWorksheet('Devices');
-    devicesSheet.addRow(['ACTION','id','brandId','brandSlug','brandName','name','slug','aliases','normalized','meta']);
+    devicesSheet.addRow(['ACTION', 'id', 'brandId', 'brandSlug', 'brandName', 'name', 'slug', 'aliases', 'normalized', 'meta']);
     for (const d of devices) {
       const aliases = Array.isArray(d.aliases) ? d.aliases.join(', ') : '';
       const brandId = d.brand?._id ? d.brand._id.toString() : (d.brand ? d.brand.toString() : '');
@@ -181,17 +181,17 @@ router.get('/export/all', authMiddleware, adminOnly, async (req, res) => {
 
     // Parts sheet (unchanged)
     const partsSheet = workbook.addWorksheet('Parts');
-    partsSheet.addRow(['ACTION','id','name','slug','description','meta']);
+    partsSheet.addRow(['ACTION', 'id', 'name', 'slug', 'description', 'meta']);
     for (const p of parts) {
       partsSheet.addRow(['', p._id?.toString(), p.name, p.slug, p.description || '', p.meta ? JSON.stringify(p.meta) : '']);
     }
 
     // Groups sheet — include part slug & model slugs (readable) and also keep ids
     const groupsSheet = workbook.addWorksheet('Groups');
-    groupsSheet.addRow(['ACTION','id','partId','partSlug','partName','modelsIds','modelsSlugs','note','source','tags','confidence']);
+    groupsSheet.addRow(['ACTION', 'id', 'partId', 'partSlug', 'partName', 'modelsIds', 'modelsSlugs', 'note', 'source', 'tags', 'confidence']);
     for (const g of groups) {
       const modelIds = Array.isArray(g.models) ? g.models.map(m => m._id?.toString() || m.toString()).join(', ') : '';
-      const modelSlugs = Array.isArray(g.models) ? g.models.map(m => m.slug || m.name || (m._id?.toString()||'')).join(', ') : '';
+      const modelSlugs = Array.isArray(g.models) ? g.models.map(m => m.slug || m.name || (m._id?.toString() || '')).join(', ') : '';
       const partId = g.partId?._id ? g.partId._id.toString() : (g.partId ? g.partId.toString() : '');
       const partSlug = g.partId?.slug || '';
       const partName = g.partId?.name || '';
@@ -213,7 +213,7 @@ router.get('/export/all', authMiddleware, adminOnly, async (req, res) => {
 
 // ---------- IMPORT route ----------
 
-router.post('/import', authMiddleware, adminOnly,  upload.single('file'), async (req, res) => {
+router.post('/import', authMiddleware, adminOnly, upload.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'file required (form field name: file)' });
 
   const filePath = req.file.path;
@@ -233,7 +233,7 @@ router.post('/import', authMiddleware, adminOnly,  upload.single('file'), async 
 
   // If dry-run requested but transactions not supported, inform the client
   if (dry && !supportsTransactions) {
-    try { fs.unlinkSync(filePath); } catch (_) {}
+    try { fs.unlinkSync(filePath); } catch (_) { }
     return res.status(400).json({
       ok: false,
       error: 'dry-run requested but MongoDB transactions are not available on this server. Enable replica set for dry-run.',
@@ -297,16 +297,16 @@ router.post('/import', authMiddleware, adminOnly,  upload.single('file'), async 
           if (!name) { summary.errors.push({ sheet: 'Brands', row: r.number, error: 'name required' }); continue; }
 
           if (action === 'update' && id) {
-            const updated = await Brand.findByIdAndUpdate(id, { name, slug, meta }, { new: true, ...(S||{}) });
+            const updated = await Brand.findByIdAndUpdate(id, { name, slug, meta }, { new: true, ...(S || {}) });
             if (updated) summary.updated++;
             else {
-              await Brand.findOneAndUpdate({ slug }, { name, slug, meta }, { upsert: true, new: true, ...(S||{}) });
+              await Brand.findOneAndUpdate({ slug }, { name, slug, meta }, { upsert: true, new: true, ...(S || {}) });
               summary.created++;
             }
           } else {
             const existing = session ? await Brand.findOne({ slug }).session(session) : await Brand.findOne({ slug });
             if (existing) {
-              await Brand.findByIdAndUpdate(existing._id, { name, slug, meta }, { new: true, ...(S||{}) });
+              await Brand.findByIdAndUpdate(existing._id, { name, slug, meta }, { new: true, ...(S || {}) });
               summary.updated++;
             } else {
               if (session) await Brand.create([{ name, slug, meta }], { session });
@@ -342,12 +342,12 @@ router.post('/import', authMiddleware, adminOnly,  upload.single('file'), async 
           if (!name) { summary.errors.push({ sheet: 'Parts', row: r.number, error: 'name required' }); continue; }
 
           if (action === 'update' && id) {
-            await PartCategory.findByIdAndUpdate(id, { name, slug, description, meta }, { new: true, ...(S||{}) });
+            await PartCategory.findByIdAndUpdate(id, { name, slug, description, meta }, { new: true, ...(S || {}) });
             summary.updated++;
           } else {
             const existing = session ? await PartCategory.findOne({ slug }).session(session) : await PartCategory.findOne({ slug });
             if (existing) {
-              await PartCategory.findByIdAndUpdate(existing._id, { name, slug, description, meta }, { new: true, ...(S||{}) });
+              await PartCategory.findByIdAndUpdate(existing._id, { name, slug, description, meta }, { new: true, ...(S || {}) });
               summary.updated++;
             } else {
               if (session) await PartCategory.create([{ name, slug, description, meta }], { session });
@@ -395,15 +395,15 @@ router.post('/import', authMiddleware, adminOnly,  upload.single('file'), async 
           }
           if (!brandDoc) { summary.errors.push({ sheet: 'Devices', row: r.number, error: `brand not found: ${brandIdRaw || brandSlugRaw}` }); continue; }
 
-          const aliases = aliasesRaw ? aliasesRaw.split(',').map(a=>a.trim()).filter(Boolean) : [];
+          const aliases = aliasesRaw ? aliasesRaw.split(',').map(a => a.trim()).filter(Boolean) : [];
 
           if (action === 'update' && id) {
-            await Device.findByIdAndUpdate(id, { brand: brandDoc._id, name, slug, aliases, normalized, meta }, { new: true, ...(S||{}) });
+            await Device.findByIdAndUpdate(id, { brand: brandDoc._id, name, slug, aliases, normalized, meta }, { new: true, ...(S || {}) });
             summary.updated++;
           } else {
             const existing = session ? await Device.findOne({ slug }).session(session) : await Device.findOne({ slug });
             if (existing) {
-              await Device.findByIdAndUpdate(existing._id, { brand: brandDoc._id, name, aliases, normalized, meta }, { new: true, ...(S||{}) });
+              await Device.findByIdAndUpdate(existing._id, { brand: brandDoc._id, name, aliases, normalized, meta }, { new: true, ...(S || {}) });
               summary.updated++;
             } else {
               if (session) await Device.create([{ brand: brandDoc._id, name, slug, aliases, normalized, meta }], { session });
@@ -435,9 +435,9 @@ router.post('/import', authMiddleware, adminOnly,  upload.single('file'), async 
           if (action === 'delete') {
             if (id) await CompatibilityGroup.findByIdAndDelete(id, S);
             else {
-              const modelSlugs = modelsRaw.split(',').map(x=>x.trim()).filter(Boolean);
+              const modelSlugs = modelsRaw.split(',').map(x => x.trim()).filter(Boolean);
               const deviceDocs = modelSlugs.length ? (session ? await Device.find({ slug: { $in: modelSlugs } }).session(session) : await Device.find({ slug: { $in: modelSlugs } })) : [];
-              const deviceIds = deviceDocs.map(d=>d._id);
+              const deviceIds = deviceDocs.map(d => d._id);
               let partDoc = null;
               if (partIdRaw && /^[0-9a-fA-F]{24}$/.test(partIdRaw)) partDoc = session ? await PartCategory.findById(partIdRaw).session(session) : await PartCategory.findById(partIdRaw);
               if (!partDoc && partSlugRaw) partDoc = session ? await PartCategory.findOne({ slug: partSlugRaw }).session(session) : await PartCategory.findOne({ slug: partSlugRaw });
@@ -457,27 +457,27 @@ router.post('/import', authMiddleware, adminOnly,  upload.single('file'), async 
           if (!partDoc && partSlugRaw) partDoc = session ? await PartCategory.findOne({ slug: partSlugRaw }).session(session) : await PartCategory.findOne({ slug: partSlugRaw });
           if (!partDoc) { summary.errors.push({ sheet: 'Groups', row: r.number, error: `part not found: ${partIdRaw || partSlugRaw}` }); continue; }
 
-          const modelTokens = modelsRaw.split(',').map(x=>x.trim()).filter(Boolean);
+          const modelTokens = modelsRaw.split(',').map(x => x.trim()).filter(Boolean);
           const idTokens = modelTokens.filter(t => /^[0-9a-fA-F]{24}$/.test(t));
           const slugTokens = modelTokens.filter(t => !/^[0-9a-fA-F]{24}$/.test(t));
           const deviceQuery = { $or: [] };
           if (idTokens.length) deviceQuery.$or.push({ _id: { $in: idTokens } });
           if (slugTokens.length) deviceQuery.$or.push({ slug: { $in: slugTokens } });
           const deviceDocs = (deviceQuery.$or.length) ? (session ? await Device.find(deviceQuery).session(session) : await Device.find(deviceQuery)) : [];
-          if (deviceDocs.length !== modelTokens.length) { summary.errors.push({ sheet: 'Groups', row: r.number, error: 'some models not found', found: deviceDocs.map(d=>d.slug) }); continue; }
-          const deviceIds = deviceDocs.map(d=>d._id);
+          if (deviceDocs.length !== modelTokens.length) { summary.errors.push({ sheet: 'Groups', row: r.number, error: 'some models not found', found: deviceDocs.map(d => d.slug) }); continue; }
+          const deviceIds = deviceDocs.map(d => d._id);
 
           if (action === 'update' && id) {
-            await CompatibilityGroup.findByIdAndUpdate(id, { partId: partDoc._id, models: deviceIds, note, source, tags: tagsRaw ? tagsRaw.split(',').map(t=>t.trim()) : [], confidence }, { new: true, ...(S||{}) });
+            await CompatibilityGroup.findByIdAndUpdate(id, { partId: partDoc._id, models: deviceIds, note, source, tags: tagsRaw ? tagsRaw.split(',').map(t => t.trim()) : [], confidence }, { new: true, ...(S || {}) });
             summary.updated++;
           } else {
             const existing = session ? await CompatibilityGroup.findOne({ partId: partDoc._id, models: { $all: deviceIds, $size: deviceIds.length } }).session(session) : await CompatibilityGroup.findOne({ partId: partDoc._id, models: { $all: deviceIds, $size: deviceIds.length } });
             if (existing) {
-              await CompatibilityGroup.findByIdAndUpdate(existing._id, { note, source, tags: tagsRaw ? tagsRaw.split(',').map(t=>t.trim()) : [], confidence }, { new: true, ...(S||{}) });
+              await CompatibilityGroup.findByIdAndUpdate(existing._id, { note, source, tags: tagsRaw ? tagsRaw.split(',').map(t => t.trim()) : [], confidence }, { new: true, ...(S || {}) });
               summary.updated++;
             } else {
-              if (session) await CompatibilityGroup.create([{ partId: partDoc._id, models: deviceIds, note, source, tags: tagsRaw ? tagsRaw.split(',').map(t=>t.trim()) : [], confidence }], { session });
-              else await CompatibilityGroup.create({ partId: partDoc._id, models: deviceIds, note, source, tags: tagsRaw ? tagsRaw.split(',').map(t=>t.trim()) : [], confidence });
+              if (session) await CompatibilityGroup.create([{ partId: partDoc._id, models: deviceIds, note, source, tags: tagsRaw ? tagsRaw.split(',').map(t => t.trim()) : [], confidence }], { session });
+              else await CompatibilityGroup.create({ partId: partDoc._id, models: deviceIds, note, source, tags: tagsRaw ? tagsRaw.split(',').map(t => t.trim()) : [], confidence });
               summary.created++;
             }
           }
@@ -490,16 +490,16 @@ router.post('/import', authMiddleware, adminOnly,  upload.single('file'), async 
       if (dry) {
         await session.abortTransaction();
         await session.endSession();
-        try { fs.unlinkSync(filePath); } catch(e){ }
+        try { fs.unlinkSync(filePath); } catch (e) { }
         return res.json({ ok: true, dry: true, summary, note: 'dry-run: no changes committed (transaction aborted)' });
       } else {
         try {
           await session.commitTransaction();
         } catch (commitErr) {
           // abort & surface helpful error
-          try { await session.abortTransaction(); } catch(_) {}
+          try { await session.abortTransaction(); } catch (_) { }
           await session.endSession();
-          try { fs.unlinkSync(filePath); } catch(_) {}
+          try { fs.unlinkSync(filePath); } catch (_) { }
           console.error('Commit error', commitErr);
           return res.status(500).json({ ok: false, error: 'Transaction commit failed - see server logs', summary, details: commitErr.message });
         }
@@ -510,7 +510,7 @@ router.post('/import', authMiddleware, adminOnly,  upload.single('file'), async 
       // dry-run case for non-transactional was already handled above (we returned 400)
     }
 
-    try { fs.unlinkSync(filePath); } catch(e){}
+    try { fs.unlinkSync(filePath); } catch (e) { }
 
     return res.json({ ok: true, summary });
   } catch (err) {
@@ -521,7 +521,7 @@ router.post('/import', authMiddleware, adminOnly,  upload.single('file'), async 
     } catch (ee) { /* ignore */ }
 
     console.error('Import error', err);
-    try { fs.unlinkSync(filePath); } catch(e){}
+    try { fs.unlinkSync(filePath); } catch (e) { }
 
     return res.status(500).json({ error: err.message, summary });
   }
@@ -533,7 +533,7 @@ router.post('/import', authMiddleware, adminOnly,  upload.single('file'), async 
 */
 
 // Create or get Brand
-router.post('/brand', authMiddleware, adminOnly,  async (req, res) => {
+router.post('/brand', authMiddleware, adminOnly, async (req, res) => {
   try {
     const name = (req.body.name || '').trim();
     if (!name) return res.status(400).json({ error: 'name required' });
@@ -545,7 +545,7 @@ router.post('/brand', authMiddleware, adminOnly,  async (req, res) => {
 });
 
 // Create Device (upsert by slug)
-router.post('/device', authMiddleware, adminOnly,  async (req, res) => {
+router.post('/device', authMiddleware, adminOnly, async (req, res) => {
   try {
     const { brandSlug, brandName, name, aliases } = req.body;
     if (!name) return res.status(400).json({ error: 'device name required' });
@@ -559,13 +559,13 @@ router.post('/device', authMiddleware, adminOnly,  async (req, res) => {
     }
     if (!brand) return res.status(400).json({ error: 'brandSlug or brandName required' });
 
-    const slug = normalize(`${brand.name} ${name}`).replace(/\s+/g,'-');
+    const slug = normalize(`${brand.name} ${name}`).replace(/\s+/g, '-');
     const normalized = normalize(`${brand.name} ${name}`);
     let device = await Device.findOne({ slug });
     if (device) {
       // update aliases if provided
       if (Array.isArray(aliases) && aliases.length) {
-        const merged = Array.from(new Set([...(device.aliases||[]), ...aliases.map(a => a.trim())]));
+        const merged = Array.from(new Set([...(device.aliases || []), ...aliases.map(a => a.trim())]));
         device.aliases = merged;
         await device.save();
       }
@@ -583,7 +583,7 @@ router.post('/device', authMiddleware, adminOnly,  async (req, res) => {
 });
 
 // Create or get PartCategory
-router.post('/part', authMiddleware, adminOnly,  async (req, res) => {
+router.post('/part', authMiddleware, adminOnly, async (req, res) => {
   try {
     const name = (req.body.name || '').trim();
     if (!name) return res.status(400).json({ error: 'name required' });
@@ -606,7 +606,7 @@ router.get('/parts', async (req, res) => {
 
 
 // Create Compatibility Group (models: array of device slugs OR ids)
-router.post('/group', authMiddleware, adminOnly,  async (req, res) => {
+router.post('/group', authMiddleware, adminOnly, async (req, res) => {
   try {
     const { partSlug, partId, models } = req.body;
     if (!models || !Array.isArray(models) || models.length < 1) return res.status(400).json({ error: 'models[] required' });
@@ -617,7 +617,7 @@ router.post('/group', authMiddleware, adminOnly,  async (req, res) => {
     if (!part) return res.status(400).json({ error: 'partSlug or partId required and must exist' });
 
     // resolve model identifiers: accept slugs or ids
-    const deviceDocs = await Device.find({ $or: [{ slug: { $in: models } }, { _id: { $in: models.filter(m=>/^[0-9a-fA-F]{24}$/.test(m)) } }] });
+    const deviceDocs = await Device.find({ $or: [{ slug: { $in: models } }, { _id: { $in: models.filter(m => /^[0-9a-fA-F]{24}$/.test(m)) } }] });
     const deviceIds = deviceDocs.map(d => d._id);
 
     if (deviceIds.length !== models.length) {
@@ -642,21 +642,21 @@ router.post('/group', authMiddleware, adminOnly,  async (req, res) => {
 });
 
 // Add alias to device
-router.post('/device/:slug/alias', authMiddleware, adminOnly,  async (req, res) => {
+router.post('/device/:slug/alias', authMiddleware, adminOnly, async (req, res) => {
   try {
     const slug = req.params.slug;
     const alias = (req.body.alias || '').trim();
     if (!alias) return res.status(400).json({ error: 'alias required' });
     const device = await Device.findOne({ slug });
     if (!device) return res.status(404).json({ error: 'device not found' });
-    device.aliases = Array.from(new Set([...(device.aliases||[]), alias]));
+    device.aliases = Array.from(new Set([...(device.aliases || []), alias]));
     await device.save();
     res.json(device);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 // Simple delete group by id
-router.delete('/group/:id', authMiddleware, adminOnly,  async (req, res) => {
+router.delete('/group/:id', authMiddleware, adminOnly, async (req, res) => {
   try {
     await CompatibilityGroup.findByIdAndDelete(req.params.id);
     res.json({ ok: true });
@@ -673,7 +673,7 @@ router.get('/brands', async (req, res) => {
 });
 
 // Update brand
-router.put('/brands/:id', authMiddleware, adminOnly,  async (req, res) => {
+router.put('/brands/:id', authMiddleware, adminOnly, async (req, res) => {
   try {
     const name = (req.body.name || '').trim();
     if (!name) return res.status(400).json({ error: 'name required' });
@@ -688,7 +688,7 @@ router.put('/brands/:id', authMiddleware, adminOnly,  async (req, res) => {
 });
 
 // Delete brand
-router.delete('/brands/:id', authMiddleware, adminOnly,  async (req, res) => {
+router.delete('/brands/:id', authMiddleware, adminOnly, async (req, res) => {
   try {
     await Brand.findByIdAndDelete(req.params.id);
     res.json({ ok: true });
@@ -706,7 +706,7 @@ router.get('/devices', async (req, res) => {
 });
 
 // Update device
-router.put('/devices/:id', authMiddleware, adminOnly,  async (req, res) => {
+router.put('/devices/:id', authMiddleware, adminOnly, async (req, res) => {
   try {
     const { name, aliases } = req.body;
     if (!name) return res.status(400).json({ error: 'device name required' });
@@ -745,7 +745,7 @@ router.delete('/devices/:id', authMiddleware, adminOnly, async (req, res) => {
 
 
 // Delete device
-router.delete('/device/:id', authMiddleware, adminOnly,  async (req, res) => {
+router.delete('/device/:id', authMiddleware, adminOnly, async (req, res) => {
   try {
     await Device.findByIdAndDelete(req.params.id);
     res.json({ ok: true });
@@ -755,7 +755,7 @@ router.delete('/device/:id', authMiddleware, adminOnly,  async (req, res) => {
 
 // --- PART CATEGORY CRUD ---
 // Update part category
-router.put('/parts/:id', authMiddleware, adminOnly,  async (req, res) => {
+router.put('/parts/:id', authMiddleware, adminOnly, async (req, res) => {
   try {
     const name = (req.body.name || '').trim();
     if (!name) return res.status(400).json({ error: 'name required' });
@@ -770,7 +770,7 @@ router.put('/parts/:id', authMiddleware, adminOnly,  async (req, res) => {
 });
 
 // Delete part category
-router.delete('/parts/:id', authMiddleware, adminOnly,  async (req, res) => {
+router.delete('/parts/:id', authMiddleware, adminOnly, async (req, res) => {
   try {
     await PartCategory.findByIdAndDelete(req.params.id);
     res.json({ ok: true });
@@ -790,29 +790,70 @@ router.get('/groups', async (req, res) => {
 });
 
 // Update group
-router.put('/groups/:id', authMiddleware, adminOnly,  async (req, res) => {
+// PUT /api/admin/groups/:id  — update group (fixed)
+router.put('/groups/:id', authMiddleware, adminOnly, async (req, res) => {
   try {
-    const { models, note, source } = req.body;
+    const { models, note, source, partSlug } = req.body;
 
-    let deviceIds = [];
-    if (Array.isArray(models) && models.length) {
-      const deviceDocs = await Device.find({
-        $or: [
-          { slug: { $in: models } },
-          { _id: { $in: models.filter(m => /^[0-9a-fA-F]{24}$/.test(m)) } }
-        ]
-      });
-      deviceIds = deviceDocs.map(d => d._id);
+    // Build update object only with fields the client provided
+    const updateObj = {};
+    if (typeof note !== 'undefined') updateObj.note = note;
+    if (typeof source !== 'undefined') updateObj.source = source;
+
+    // Resolve device ids if models provided (accept slugs or ids)
+    if (typeof models !== 'undefined') {
+      if (!Array.isArray(models)) {
+        return res.status(400).json({ error: 'models must be an array of slugs or ids' });
+      }
+
+      // If models is empty array, we'll set models to empty (caller explicitly asked to clear)
+      let deviceIds = [];
+      if (models.length) {
+        const idTokens = models.filter(m => /^[0-9a-fA-F]{24}$/.test(m));
+        const slugTokens = models.filter(m => !/^[0-9a-fA-F]{24}$/.test(m));
+        const deviceQuery = { $or: [] };
+        if (idTokens.length) deviceQuery.$or.push({ _id: { $in: idTokens } });
+        if (slugTokens.length) deviceQuery.$or.push({ slug: { $in: slugTokens } });
+
+        const deviceDocs = (deviceQuery.$or.length) ? await Device.find(deviceQuery).select('_id slug').lean() : [];
+        if (deviceDocs.length !== models.length) {
+          const found = deviceDocs.map(d => d.slug || d._id.toString());
+          return res.status(400).json({ error: 'some models not found', found, requested: models });
+        }
+        deviceIds = deviceDocs.map(d => d._id);
+      }
+      updateObj.models = deviceIds;
     }
 
-    const updated = await CompatibilityGroup.findByIdAndUpdate(
-      req.params.id,
-      { models: deviceIds, note, source },
-      { new: true }
-    );
+    // Resolve partSlug -> partId if provided
+    if (typeof partSlug === 'string' && partSlug.trim()) {
+      const partDoc = await PartCategory.findOne({ slug: partSlug.trim() }).select('_id').lean();
+      if (!partDoc) return res.status(400).json({ error: `part not found: ${partSlug}` });
+      updateObj.partId = partDoc._id;
+    }
+
+    // If nothing to update
+    if (Object.keys(updateObj).length === 0) {
+      return res.status(400).json({ error: 'no updatable fields provided' });
+    }
+
+    // Perform update
+    await CompatibilityGroup.findByIdAndUpdate(req.params.id, updateObj, { new: true });
+
+    // Return populated doc
+    const updated = await CompatibilityGroup.findById(req.params.id)
+      .populate('partId', 'name slug')
+      .populate('models', 'name slug');
+
+    if (!updated) return res.status(404).json({ error: 'group not found' });
+
     res.json(updated);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) {
+    console.error('PUT /groups/:id error', err);
+    res.status(500).json({ error: err.message });
+  }
 });
+
 
 
 // -------------------- NEW: Paginated / searchable routes --------------------
@@ -938,15 +979,41 @@ router.get('/groups/paginated', async (req, res) => {
     const q = (req.query.q || '').trim();
     const re = buildTextRegex(q);
 
-    const partColl = PartCategory.collection.name;
-    const deviceColl = Device.collection.name;
+    const partColl = PartCategory.collection.name;  // e.g. 'partcategories'
+    const deviceColl = Device.collection.name;     // e.g. 'devices'
+    const brandColl = Brand.collection.name;       // e.g. 'brands'
 
     const pipeline = [
       // attach part
       { $lookup: { from: partColl, localField: 'partId', foreignField: '_id', as: 'part' } },
       { $unwind: { path: '$part', preserveNullAndEmptyArrays: true } },
-      // attach devices
-      { $lookup: { from: deviceColl, localField: 'models', foreignField: '_id', as: 'devices' } },
+
+      // attach devices with brand populated via a pipeline lookup
+      {
+        $lookup: {
+          from: deviceColl,
+          let: { modelIds: '$models' }, // models is an array of ObjectId in groups
+          pipeline: [
+            { $match: { $expr: { $in: ['$_id', { $ifNull: ['$$modelIds', []] }] } } },
+
+            // lookup brand for each device
+            { $lookup: { from: brandColl, localField: 'brand', foreignField: '_id', as: 'brand' } },
+            { $unwind: { path: '$brand', preserveNullAndEmptyArrays: true } },
+
+            // project device with brand subdoc (keep only fields we need)
+            {
+              $project: {
+                _id: 1,
+                name: 1,
+                slug: 1,
+                // include any other device fields you want (aliases, variant, etc.)
+                brand: { _id: '$brand._id', name: '$brand.name' }
+              }
+            }
+          ],
+          as: 'devices'
+        }
+      }
     ];
 
     if (re) {
@@ -957,6 +1024,8 @@ router.get('/groups/paginated', async (req, res) => {
             { 'part.slug': re },
             { 'devices.slug': re },
             { 'devices.name': re },
+            // also allow searching by device brand name
+            { 'devices.brand.name': re },
             { note: re },
             { source: re }
           ]
@@ -971,12 +1040,12 @@ router.get('/groups/paginated', async (req, res) => {
           { $sort: { _id: 1 } },
           { $skip: (page - 1) * limit },
           { $limit: limit },
-          // project friendly output
+          // project friendly output (devices already include brand)
           {
             $project: {
               _id: 1,
               part: { _id: '$part._id', name: '$part.name', slug: '$part.slug' },
-              devices: { $map: { input: '$devices', as: 'd', in: { _id: '$$d._id', name: '$$d.name', slug: '$$d.slug' } } },
+              devices: 1, // already shaped by the pipeline lookup
               note: 1,
               source: 1,
               tags: 1,
@@ -1001,6 +1070,203 @@ router.get('/groups/paginated', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+
+// ---------- Robust DELETE endpoints (replace/append existing delete handlers) ----------
+const isObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
+
+function parseForce(q) {
+  if (!q) return false;
+  return q === '1' || q === 'true' || q === 'yes';
+}
+
+/**
+ * DELETE /brands/:id
+ * Query: ?force=true  -> delete brand and cascade-delete devices & groups that reference them
+ * If force not provided, refuses deletion when devices exist and returns list of device ids.
+ */
+router.delete('/brands/:id', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const force = parseForce(req.query.force);
+
+    if (!isObjectId(id)) return res.status(400).json({ error: 'invalid brand id' });
+
+    const brand = await Brand.findById(id);
+    if (!brand) return res.status(404).json({ error: 'brand not found' });
+
+    const devices = await Device.find({ brand: brand._id }).select('_id name slug').lean();
+    const deviceIds = devices.map(d => d._id);
+
+    if (!force && deviceIds.length) {
+      return res.status(400).json({
+        error: 'brand has devices. use ?force=true to cascade delete devices and related groups',
+        devices
+      });
+    }
+
+    // If force, remove groups that reference these devices, then delete devices, then brand
+    if (force && deviceIds.length) {
+      // delete groups that contain any of these devices
+      // we remove groups that become empty; if a group still has other devices we remove the device from the group
+      const groupsWithDevices = await CompatibilityGroup.find({ models: { $in: deviceIds } });
+
+      for (const g of groupsWithDevices) {
+        // remove the device ids from models
+        g.models = g.models.filter(m => !deviceIds.some(id => id.equals(m)));
+        if (!g.models || g.models.length === 0) {
+          await CompatibilityGroup.findByIdAndDelete(g._id);
+        } else {
+          await CompatibilityGroup.findByIdAndUpdate(g._id, { models: g.models }, { new: true });
+        }
+      }
+
+      // delete devices
+      await Device.deleteMany({ _id: { $in: deviceIds } });
+    }
+
+    await Brand.findByIdAndDelete(brand._id);
+
+    return res.json({ ok: true, message: 'brand deleted', brandId: id, cascadeDeletedDevices: force ? deviceIds : [] });
+  } catch (err) {
+    console.error('DELETE /brands/:id error', err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * DELETE /devices/:id
+ * Query: ?force=true
+ * - if groups reference this device and force not provided -> returns error with groups list
+ * - if force=true -> removes device from groups (deletes groups that become empty) and deletes device
+ */
+router.delete('/devices/:id', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const force = parseForce(req.query.force);
+
+    if (!isObjectId(id)) return res.status(400).json({ error: 'invalid device id' });
+
+    const device = await Device.findById(id).lean();
+    if (!device) return res.status(404).json({ error: 'device not found' });
+
+    const groups = await CompatibilityGroup.find({ models: id }).select('_id partId note').lean();
+
+    if (!force && groups.length) {
+      return res.status(400).json({
+        error: 'device is referenced by compatibility groups. use ?force=true to remove it from groups (groups that become empty will be deleted).',
+        groups
+      });
+    }
+
+    // force removal from groups (or delete groups that become empty)
+    if (groups.length) {
+      for (const g of groups) {
+        // pull the device id
+        await CompatibilityGroup.findByIdAndUpdate(g._id, { $pull: { models: id } }, { new: true });
+        // check if now empty
+        const updated = await CompatibilityGroup.findById(g._id).select('models').lean();
+        if (!updated || !updated.models || updated.models.length === 0) {
+          await CompatibilityGroup.findByIdAndDelete(g._id);
+        }
+      }
+    }
+
+    await Device.findByIdAndDelete(id);
+
+    return res.json({ ok: true, message: 'device deleted', deviceId: id });
+  } catch (err) {
+    console.error('DELETE /devices/:id error', err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * DELETE /parts/:id
+ * Query: ?force=true
+ * If compatibility groups reference this part, requires ?force=true to delete groups as well.
+ */
+router.delete('/parts/:id', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const force = parseForce(req.query.force);
+
+    if (!isObjectId(id)) return res.status(400).json({ error: 'invalid part id' });
+
+    const part = await PartCategory.findById(id).lean();
+    if (!part) return res.status(404).json({ error: 'part not found' });
+
+    const groups = await CompatibilityGroup.find({ partId: id }).select('_id note models').lean();
+
+    if (!force && groups.length) {
+      return res.status(400).json({
+        error: 'part is referenced by compatibility groups. use ?force=true to delete those groups as well.',
+        groups
+      });
+    }
+
+    // If force: delete those groups
+    if (groups.length && force) {
+      const groupIds = groups.map(g => g._id);
+      await CompatibilityGroup.deleteMany({ _id: { $in: groupIds } });
+    }
+
+    await PartCategory.findByIdAndDelete(id);
+
+    return res.json({ ok: true, message: 'part deleted', partId: id, deletedGroups: force ? groups.map(g => g._id) : [] });
+  } catch (err) {
+    console.error('DELETE /parts/:id error', err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * DELETE /groups/:id
+ * Deletes a compatibility group by id (simple).
+ */
+router.delete('/groups/:id', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!isObjectId(id)) return res.status(400).json({ error: 'invalid group id' });
+
+    const group = await CompatibilityGroup.findByIdAndDelete(id);
+    if (!group) return res.status(404).json({ error: 'group not found' });
+
+    return res.json({ ok: true, message: 'group deleted', groupId: id });
+  } catch (err) {
+    console.error('DELETE /groups/:id error', err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Get device by slug (for front-end lookup when editing)
+router.get('/devices/slug/:slug', async (req, res) => {
+  try {
+    const slug = req.params.slug;
+    const device = await Device.findOne({ slug }).populate('brand', 'name slug').lean();
+    if (!device) return res.status(404).json({ error: 'device not found' });
+    res.json(device);
+  } catch (err) {
+    console.error('GET /devices/slug/:slug error', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+// Get device by id
+router.get('/devices/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ error: 'invalid device id' });
+    const device = await Device.findById(id).populate('brand', 'name slug').lean();
+    if (!device) return res.status(404).json({ error: 'device not found' });
+    res.json(device);
+  } catch (err) {
+    console.error('GET /devices/:id error', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 
 module.exports = router;

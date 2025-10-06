@@ -2,7 +2,7 @@
   --bg: #ffffff;
   --muted: #64748b;
   --text: #0b1220;
-  --accent: #1a73e8; /* google-blue-ish */
+  --accent: #1a73e8;
   --pill-shadow: 0 6px 18px rgba(16,24,40,0.06);
   --dropdown-shadow: 0 14px 40px rgba(16,24,40,0.08);
   --radius: 24px;
@@ -19,6 +19,7 @@
 }
 
 /* the pill that mimics google search */
+/* allow wrapping on narrow screens (important!) */
 .searchPill {
   display: flex;
   align-items: center;
@@ -29,6 +30,9 @@
   box-shadow: var(--pill-shadow);
   border: 1px solid rgba(16,24,40,0.04);
   position: relative;
+
+  /* allow children to wrap when space is limited */
+  flex-wrap: nowrap; /* default to no-wrap on desktop */
 }
 
 /* left magnifier */
@@ -41,7 +45,7 @@
   flex: 0 0 28px;
 }
 
-/* main input - reserve space on the right for select and clear button */
+/* main input - ensure it can shrink on small screens: min-width:0 is critical */
 .searchInput {
   flex: 1 1 auto;
   border: none;
@@ -50,10 +54,10 @@
   padding: 8px 10px;
   color: var(--text);
   outline: none;
-  min-width: 120px;
+  min-width: 0; /* allow input to shrink (fixes overflow) */
 }
 
-/* clear button (x) similar to google small circle x */
+/* clear button */
 .clearBtn {
   background: rgba(16,24,40,0.06);
   border: none;
@@ -81,6 +85,7 @@
   gap: 6px;
   margin-left: 8px;
   flex: 0 0 auto;
+  min-width: 0;
 }
 
 /* select appearance: compact pill */
@@ -95,26 +100,34 @@
   font-size: 14px;
   cursor: pointer;
   color: var(--text);
-  max-width: 101px;
-  /* min-width: 140px; */
+
+  /* limit width so select doesn't force overflow */
+  max-width: 160px;
+  width: auto;
   text-align: left;
   box-shadow: 0 2px 6px rgba(16,24,40,0.04);
+
+  /* cropping & ellipsis for long part names */
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 /* hide IE/Edge expand arrow */
 .partSelect::-ms-expand { display: none; }
 
-/* dropdown wrapper anchored inside the pill area and right-aligned */
+/* dropdown wrapper anchored inside the pill area */
+/* align the dropdown with the container and prevent overflow */
 .dropdownWrapper {
   position: absolute;
   top: calc(100% + 10px); /* below pill */
-  right: 8px;             /* align to right edge of pill */
+  right: 8px;             /* align to right edge of pill on wide screens */
   z-index: 10010;
-  width: min(560px, 48%); /* google-like: moderate width */
+  width: min(560px, 48%);
   box-sizing: border-box;
 }
 
-/* full-width fallback on small screens */
+/* responsive dropdown: full-width under small screens */
 @media (max-width: 760px) {
   .dropdownWrapper {
     left: 8px;
@@ -122,6 +135,14 @@
     width: auto;
   }
 }
+
+@media (max-width: 521px) {
+  .leftIcon {
+    display: none;
+  }
+}
+
+
 
 /* suggestions list */
 .suggestionsList {
@@ -152,7 +173,7 @@
 
 .suggestionItem:hover,
 .active {
-  background: rgba(26,115,232,0.04); /* subtle bluish hover like google */
+  background: rgba(26,115,232,0.04);
   transform: translateY(-1px);
 }
 
@@ -200,8 +221,48 @@
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
 
-/* responsive tweaks */
+/* MOBILE: stack input above select for small screens */
 @media (max-width: 520px) {
-  .partSelect { min-width: 110px; font-size: 13px; padding: 7px 8px; }
-  .searchInput { font-size: 15px; }
+  .searchPill {
+    flex-wrap: wrap; /* allow stacking */
+    gap: 6px;
+    padding: 10px;
+  }
+
+  /* input full width on small screens */
+  .searchInput {
+    order: 1;
+    width: 100%;
+    min-width: 0;
+    font-size: 15px;
+    padding: 8px 10px;
+  }
+
+  /* clear button stays with input; allow it to wrap */
+  .clearBtn {
+    order: 1;
+  }
+
+  /* select moves below input and becomes full-width */
+  .partContainer {
+    order: 2;
+    width: 100%;
+    margin-left: 0;
+    justify-content: flex-end; /* or space-between if you want label left */
+  }
+
+  .partSelect {
+    width: 100%;
+    max-width: none;
+    text-overflow: ellipsis;
+    padding: 9px 12px;
+    font-size: 14px;
+  }
+
+  /* dropdown should expand to full width of container */
+  .dropdownWrapper {
+    left: 8px;
+    right: 8px;
+    width: auto;
+  }
 }

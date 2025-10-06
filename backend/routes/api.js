@@ -35,39 +35,56 @@ router.get('/parts/:partSlug/groups', async (req, res) => {
 
 // search text (devices or groups)
 router.get('/search', async (req, res) => {
-  const q = (req.query.q || '').trim();
-  const part = req.query.part; // optional part slug
-  if (!q) return res.json({ devices: [], groups: [] });
+  try {
+    const q = (req.query.q || '').trim();
+    const partSlug = (req.query.part || '').trim(); // optional part slug
+    if (!q) return res.json({ devices: [], groups: [] });
 
-  // find devices first
-  const norm = normalize(q);
-  let devices = await Device.find({ normalized: norm }).populate('brand','name').limit(10);
-  if (!devices.length) {
-    devices = await Device.find({ $text: { $search: q } }).limit(10).populate('brand','name');
-  }
-
-  // if part provided and we found at least one device, fetch groups
-  let groups = [];
-  if (part) {
-    const partDoc = await Part.findOne({ slug: part });
-    if (partDoc && devices.length) {
-      const ids = devices.map(d => d._id);
-      groups = await CompatibilityGroup.find({ partId: partDoc._id, models: { $in: ids } })
-        .populate({ path: 'models', populate: { path: 'brand', select: 'name' } });
+    // find devices first
+    const norm = normalize(q);
+    let devices = await Device.find({ normalized: norm }).populate('brand','name').limit(10);
+    if (!devices.length) {
+      devices = await Device.find({ $text: { $search: q } }).limit(10).populate('brand','name');
     }
-  } else {
-    // fallback: find groups by text inside models/aliases via lookup - heavier
-    // we'll look up all groups that include devices matched above
-    if (devices.length) {
-      const ids = devices.map(d => d._id);
-      groups = await CompatibilityGroup.find({ models: { $in: ids } })
-        .populate({ path: 'models', populate: { path: 'brand', select: 'name' } })
-        .limit(50);
-    }
-  }
 
-  res.json({ devices, groups });
+    const deviceIds = devices.map(d => d._id);
+    let groups = [];
+
+    if (partSlug) {
+      // ensure part exists — if part was deleted, don't return groups
+      const partDoc = await Part.findOne({ slug: partSlug });
+      if (partDoc) {
+        // support either single partId field or parts array in group schema
+        const partFilter = { $or: [{ partId: partDoc._id }, { parts: partDoc._id }] };
+
+        // if we have device matches, require group to include at least one of them
+        const query = deviceIds.length
+          ? { $and: [partFilter, { models: { $in: deviceIds } }] }
+          : partFilter;
+
+        groups = await CompatibilityGroup.find(query)
+          .populate({ path: 'models', populate: { path: 'brand', select: 'name' } })
+          .limit(50);
+      } else {
+        // partSlug provided but Part not found -> intentionally return no groups
+        groups = [];
+      }
+    } else {
+      // no part specified -> find groups that include any of the matched devices
+      if (deviceIds.length) {
+        groups = await CompatibilityGroup.find({ models: { $in: deviceIds } })
+          .populate({ path: 'models', populate: { path: 'brand', select: 'name' } })
+          .limit(50);
+      }
+    }
+
+    return res.json({ devices, groups });
+  } catch (err) {
+    console.error('search error', err);
+    return res.status(500).json({ error: 'Server error' });
+  }
 });
+
 
 // compatibility check: part + comma-separated device slugs
 router.get('/compat/check', async (req, res) => {

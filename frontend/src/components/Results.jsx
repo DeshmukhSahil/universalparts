@@ -16,7 +16,7 @@ export default function Results({
   allGroups = null,
   selectedPart,
   parts = [],
-  onPartSelect = () => { },
+  onPartSelect = () => {},
 }) {
   // UI state
   const [focusedTab, setFocusedTab] = useState(0);
@@ -55,150 +55,98 @@ export default function Results({
   // Choose source for counts/availableParts: prefer allGroups if provided
   const sourceGroups = Array.isArray(allGroups) ? allGroups : groups;
 
-  //
-  // Build the base unsorted list of parts (so counts calculation isn't circular).
-  // We'll sort this list afterwards using countsByPart.
-  //
-  const availablePartsBase = useMemo(() => {
-    const map = new Map();
-    map.set('', { slug: '', name: 'All' });
+  // Build lookups from parts prop (slug / id / name) so we only treat known parts as authoritative
+  const { bySlug, byId, byName } = useMemo(() => {
+    const bs = new Map();
+    const bi = new Map();
+    const bn = new Map();
 
     if (Array.isArray(parts)) {
       for (const p of parts) {
-        const key = normalizeKey(p.slug || p.name || '');
-        if (!key) continue;
-        if (!map.has(key)) map.set(key, { slug: p.slug || p.name || key, name: p.name || p.slug || key });
-      }
-    }
-
-    for (const g of sourceGroups || []) {
-      if (!g || !Array.isArray(g._parts)) continue;
-      for (const p of g._parts) {
         if (!p) continue;
-        const key = normalizeKey(p.slug || p.name || '');
-        if (!key) continue;
-        if (!map.has(key)) map.set(key, { slug: p.slug || p.name || key, name: p.name || p.slug || key });
+        const slug = String(p.slug || '').trim();
+        const id = String(p._id || p.id || '').trim();
+        const name = String(p.name || '').trim();
+        if (slug) bs.set(slug.toLowerCase(), { slug, name });
+        if (id) bi.set(id, { slug: p.slug || id, name: p.name || p.slug || id });
+        if (name) bn.set(name.toLowerCase(), { slug: p.slug || name, name });
       }
     }
 
-    return Array.from(map.values());
-  }, [parts, sourceGroups]);
+    return { bySlug: bs, byId: bi, byName: bn };
+  }, [parts]);
 
-  // counts (All = total groups) — computed from sourceGroups so counts stay stable
-  // const countsByPart = useMemo(() => {
-  //   const counts = new Map();
-  //   counts.set('', (sourceGroups && sourceGroups.length) || 0); // All
+  // helper: try to resolve a candidate (slug | id | name) -> {slug,name} or null
+  function resolveCandidate(value) {
+    if (!value && value !== 0) return null;
+    const s = String(value).trim();
+    if (!s) return null;
+    // id exact match first
+    if (byId.has(s)) return byId.get(s);
+    const norm = s.toLowerCase();
+    if (bySlug.has(norm)) return bySlug.get(norm);
+    if (byName.has(norm)) return byName.get(norm);
+    return null;
+  }
 
-  //   for (const p of availablePartsBase) {
-  //     const key = p.slug || p.name || '';
-  //     if (key === '') continue;
-  //     counts.set(key, 0);
-  //   }
+  // Filter sourceGroups to exclude groups that reference only unknown raw part ids.
+  // Keep groups that either have resolvable _parts entries, or have no part reference at all.
+  const filteredSourceGroups = useMemo(() => {
+    if (!Array.isArray(sourceGroups)) return [];
+    return sourceGroups.filter((g) => {
+      if (!g) return false;
 
-  //   const normToKey = new Map();
-  //   for (const p of availablePartsBase) {
-  //     const norm = normalizeKey(p.slug || p.name || '');
-  //     if (!norm) continue;
-  //     normToKey.set(norm, p.slug || p.name || norm);
-  //   }
+      // explicit _parts: keep only if any entry resolves to known part
+      if (Array.isArray(g._parts) && g._parts.length) {
+        for (const pp of g._parts) {
+          const candidate = pp?.slug || pp?.name;
+          if (candidate && resolveCandidate(candidate)) return true;
+        }
+        // _parts present but none resolvable -> drop the group
+        return false;
+      }
 
-  //   for (const g of sourceGroups || []) {
-  //     const seen = new Set();
-  //     if (g && Array.isArray(g._parts) && g._parts.length) {
-  //       for (const p of g._parts) {
-  //         const norm = normalizeKey(p?.slug || p?.name || '');
-  //         if (!norm) continue;
-  //         const key = normToKey.get(norm);
-  //         if (key && !seen.has(key)) {
-  //           counts.set(key, (counts.get(key) || 0) + 1);
-  //           seen.add(key);
-  //         }
-  //       }
-  //     } else if (g && g.partId) {
-  //       const norm = normalizeKey(g.partId);
-  //       const key = normToKey.get(norm);
-  //       if (key && !seen.has(key)) {
-  //         counts.set(key, (counts.get(key) || 0) + 1);
-  //         seen.add(key);
-  //       }
-  //     }
-  //   }
-  //   return counts;
-  // }, [availablePartsBase, sourceGroups]);
+      // partId present: keep only if it resolves against known parts
+      if (g.partId) {
+        return !!resolveCandidate(g.partId);
+      }
 
-  // Now produce a sorted list: keep "All" first, then other parts sorted by count desc, tie-break by name asc
-  //
-  // Robust part discovery + counts
-  // - collects parts from: parts prop, group._parts, group.partId
-  // - normalizes keys consistently
-  // - produces `availableParts` (Array) and `countsByPart` (Map)
-  //
-  // Robust part discovery + counts — resolve against `parts` prop and skip raw ids
+      // neither _parts nor partId -> assume generic group, keep it
+      return true;
+    });
+  }, [sourceGroups, byId, bySlug, byName]);
+
+  // Now build availableParts and counts using filteredSourceGroups
   const { availableParts, countsByPart } = useMemo(() => {
     const partMap = new Map(); // norm -> { slug, name, count }
 
-    // build lookups from parts prop
-    const bySlug = new Map();
-    const byId = new Map();
-    const byName = new Map();
+    // Seed from parts prop (authoritative list)
     if (Array.isArray(parts)) {
       for (const p of parts) {
         if (!p) continue;
-        // ensure slug and name exist
-        const slug = p.slug || p.id || p._id || p.name;
-        const name = p.name || p.slug || String(p.id || p._id || '');
+        const slug = p.slug || String(p._id || p.name || '');
+        const name = p.name || p.slug || String(p._id || '');
         const norm = normalizeKey(slug || name);
         if (!norm) continue;
-        bySlug.set(normalizeKey(p.slug || ''), { slug: p.slug || slug, name });
-        if (p._id || p.id) byId.set(String(p._id || p.id), { slug: p.slug || slug, name });
-        byName.set(normalizeKey(name), { slug: p.slug || slug, name });
-
-        // seed partMap with authoritative entries
         if (!partMap.has(norm)) partMap.set(norm, { slug: p.slug || slug, name, count: 0 });
       }
     }
 
-    // helper: try to resolve a candidate (slug/id/name) to {slug,name}
-    function resolveCandidate(value) {
-      if (!value && value !== 0) return null;
-      const s = String(value).trim();
-      if (!s) return null;
-      const norm = normalizeKey(s);
-
-      // try slug lookup
-      const fromSlug = bySlug.get(norm);
-      if (fromSlug) return fromSlug;
-
-      // try id lookup (raw match)
-      const fromId = byId.get(s);
-      if (fromId) return fromId;
-
-      // try name lookup
-      const fromName = byName.get(norm);
-      if (fromName) return fromName;
-
-      // not resolvable
-      return null;
-    }
-
-    // seed from groups (use resolved parts only — skip unknown ids)
-    for (const g of sourceGroups || []) {
+    // Also include resolvable parts referenced by groups
+    for (const g of filteredSourceGroups || []) {
       if (!g) continue;
       if (Array.isArray(g._parts) && g._parts.length) {
         for (const pp of g._parts) {
-          if (!pp) continue;
-          // prefer explicit name/slug from the group item, but resolve against parts list if possible
-          const candidate = pp.slug || pp.name;
-          const resolved = resolveCandidate(candidate) || (pp.name ? { slug: pp.slug || pp.name, name: pp.name } : null);
-          if (!resolved) continue; // skip unknown raw ids
+          const candidate = pp?.slug || pp?.name;
+          const resolved = resolveCandidate(candidate) || (pp?.name ? { slug: pp.slug || pp.name, name: pp.name } : null);
+          if (!resolved) continue;
           const norm = normalizeKey(resolved.slug || resolved.name);
           if (!norm) continue;
           if (!partMap.has(norm)) partMap.set(norm, { slug: resolved.slug, name: resolved.name, count: 0 });
         }
-      }
-      if (g.partId) {
+      } else if (g.partId) {
         const resolved = resolveCandidate(g.partId);
-        if (!resolved) continue; // skip showing raw partId values
+        if (!resolved) continue;
         const norm = normalizeKey(resolved.slug || resolved.name);
         if (!norm) continue;
         if (!partMap.has(norm)) partMap.set(norm, { slug: resolved.slug, name: resolved.name, count: 0 });
@@ -206,7 +154,7 @@ export default function Results({
     }
 
     // Count groups per part (avoid double counting same group for same part)
-    for (const g of sourceGroups || []) {
+    for (const g of filteredSourceGroups || []) {
       if (!g) continue;
       const seenThisGroup = new Set();
 
@@ -216,7 +164,6 @@ export default function Results({
           const resolved = resolveCandidate(candidate) || (pp?.name ? { slug: pp.slug || pp.name, name: pp.name } : null);
           if (!resolved) continue;
           const norm = normalizeKey(resolved.slug || resolved.name);
-          if (!norm) continue;
           if (partMap.has(norm) && !seenThisGroup.has(norm)) {
             partMap.get(norm).count += 1;
             seenThisGroup.add(norm);
@@ -226,7 +173,6 @@ export default function Results({
         const resolved = resolveCandidate(g.partId);
         if (!resolved) continue;
         const norm = normalizeKey(resolved.slug || resolved.name);
-        if (!norm) continue;
         if (partMap.has(norm) && !seenThisGroup.has(norm)) {
           partMap.get(norm).count += 1;
           seenThisGroup.add(norm);
@@ -234,8 +180,8 @@ export default function Results({
       }
     }
 
-    // build availableParts array (All first)
-    const allEntry = { slug: '', name: 'All', count: (sourceGroups && sourceGroups.length) || 0 };
+    // build available parts array
+    const allEntry = { slug: '', name: 'All', count: (filteredSourceGroups && filteredSourceGroups.length) || 0 };
     const rest = Array.from(partMap.values()).map((v) => ({ slug: v.slug, name: v.name, count: v.count }));
 
     rest.sort((a, b) => {
@@ -247,34 +193,56 @@ export default function Results({
       return 0;
     });
 
-    // create counts map keyed by slug (fallback to name)
     const countsMap = new Map();
     countsMap.set('', allEntry.count);
     for (const p of rest) countsMap.set(p.slug || p.name || '', p.count || 0);
 
-    console.debug('Results debug (resolved parts):', {
-      sourceGroupsLength: (sourceGroups && sourceGroups.length) || 0,
-      sampleGroup: (sourceGroups && sourceGroups[0]) || null,
-      availableParts: [allEntry, ...rest].slice(0, 30),
-      counts: Array.from(countsMap.entries()).slice(0, 30),
-    });
+    // debug
+    // console.debug('Results debug (resolved parts):', {
+    //   filteredSourceGroupsLength: (filteredSourceGroups && filteredSourceGroups.length) || 0,
+    //   availableParts: [allEntry, ...rest].slice(0, 30),
+    //   counts: Array.from(countsMap.entries()).slice(0, 30),
+    // });
 
     return { availableParts: [allEntry, ...rest], countsByPart: countsMap };
-  }, [parts, sourceGroups]);
+  }, [parts, filteredSourceGroups]);
 
-
-
-  // displayed groups filtered by activeSlug — still use the `groups` prop for display
+  // displayed groups filtered by activeSlug — use groups prop but filter out groups that reference unknown parts
   const displayedGroups = useMemo(() => {
-    if (!activeSlug) return groups;
-    return groups.filter((g) => {
-      if (g && Array.isArray(g._parts) && g._parts.length) {
-        return g._parts.some((p) => normalizeKey(p?.slug || p?.name || '') === normalizeKey(activeSlug));
+    // pre-filter groups to drop those that reference only unknown parts (keep generic groups)
+    const visibleGroups = (groups || []).filter((g) => {
+      if (!g) return false;
+      if (Array.isArray(g._parts) && g._parts.length) {
+        // keep if any _parts resolvable
+        return g._parts.some((pp) => {
+          const cand = pp?.slug || pp?.name;
+          return !!resolveCandidate(cand);
+        });
       }
-      if (g && g.partId) return normalizeKey(g.partId) === normalizeKey(activeSlug);
+      if (g.partId) {
+        // keep only if partId resolves
+        return !!resolveCandidate(g.partId);
+      }
+      return true;
+    });
+
+    if (!activeSlug) return visibleGroups;
+    return visibleGroups.filter((g) => {
+      if (!g) return false;
+      if (Array.isArray(g._parts) && g._parts.length) {
+        return g._parts.some((p) => {
+          const candidate = p?.slug || p?.name || '';
+          return normalizeKey(candidate) === normalizeKey(activeSlug);
+        });
+      }
+      if (g.partId) {
+        const resolved = resolveCandidate(g.partId);
+        if (!resolved) return false;
+        return normalizeKey(resolved.slug || resolved.name || '') === normalizeKey(activeSlug);
+      }
       return false;
     });
-  }, [groups, activeSlug]);
+  }, [groups, activeSlug, byId, bySlug, byName]);
 
   // keyboard nav helpers for tabs
   function focusTab(idx) {
@@ -339,29 +307,16 @@ export default function Results({
     setExpandedMap(newMap);
   }
 
-  // replace the old groupPartsLabel with this
+  // improved label for parts (avoid printing raw ids)
   function groupPartsLabel(g) {
-    // prefer explicit _parts on the group
     if (g && Array.isArray(g._parts) && g._parts.length) {
       return g._parts.map((p) => p.name || p.slug).filter(Boolean).join(', ');
     }
-
-    // if parent provided a selectedPart (e.g. when user filtered), show that
     if (selectedPart) return selectedPart.name;
-
-    // fallback: try to resolve g.partId against the known parts list
     if (g && g.partId) {
-      const match =
-        parts.find(
-          (p) =>
-            String(p.slug) === String(g.partId) ||
-            String(p._id) === String(g.partId) ||
-            String(p.id) === String(g.partId) ||
-            String(p.name) === String(g.partId)
-        ) || null;
-      return (match && (match.name || match.slug)) || String(g.partId);
+      const match = resolveCandidate(g.partId);
+      return (match && (match.name || match.slug)) || 'Unknown part';
     }
-
     return 'Part';
   }
 
@@ -462,43 +417,6 @@ export default function Results({
                     </button>
                   </div>
                 </div>
-
-                {/* part badges */}
-                {/* part badges */}
-                {/* <div className={styles.partBadges}>
-                  {(
-                    // prefer explicit _parts; otherwise try to synthesize from g.partId
-                    (Array.isArray(g._parts) && g._parts.length
-                      ? g._parts
-                      : (g.partId
-                        ? // synthesize a single-part array using parts[] lookup
-                        [
-                          (() => {
-                            const match =
-                              parts.find(
-                                (p) =>
-                                  String(p.slug) === String(g.partId) ||
-                                  String(p._id) === String(g.partId) ||
-                                  String(p.id) === String(g.partId) ||
-                                  String(p.name) === String(g.partId)
-                              ) || null;
-                            return { slug: match?.slug || g.partId, name: match?.name || String(g.partId) };
-                          })()
-                        ]
-                        : [])
-                    )
-                  ).map((p) => (
-                    <button
-                      key={p.slug || p.name}
-                      className={styles.partBadge}
-                      onClick={() => handleSelectPart(p.slug || '')}
-                      title={`Show ${p.name}`}
-                    >
-                      {p.name}
-                    </button>
-                  ))}
-                </div> */}
-
 
                 {/* models grid (collapsible on mobile) */}
                 <div
